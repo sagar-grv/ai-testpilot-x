@@ -429,3 +429,14 @@ def test_should_analyze_bugs_routing():
     state_no_failures = {"execution_results": {"failed": 0, "passed": 3, "total": 3, "mode": "MOCK", "results": []}}
     assert _should_analyze_bugs(state_with_failures) == "bug_analysis"
     assert _should_analyze_bugs(state_no_failures) == "report"
+
+
+# ── Task 6.1: Explain Engine ─────────────────────────────────────────────────
+
+def test_explain_engine_returns_string():
+    from core.explain_engine import explain_decision
+    from unittest.mock import patch
+    with patch("core.llm_client.LLMClient.generate", return_value="The AI identified Login as high priority because it is a critical user flow."):
+        result = explain_decision("Priority: High, Modules: Login, Risk: Auth")
+    assert isinstance(result, str)
+    assert len(result) > 0
