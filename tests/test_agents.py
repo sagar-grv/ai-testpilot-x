@@ -214,3 +214,51 @@ def test_healing_agent_returns_success_false_on_empty():
         result = agent.attempt_healing("NoSuchElement: #btn", "https://example.com")
     assert result["success"] is False
     assert result["recovered_selector"] == ""
+
+
+# ── Task 4.1: APIAgent + api_runner ─────────────────────────────────────────
+
+def test_api_agent_returns_list():
+    from agents.api_agent import APIAgent
+    from schemas.api_test_schema import APITestResultSchema
+    from schemas.requirement_schema import RequirementSchema
+    mock_response = '[{"method":"GET","endpoint":"/api/login","body":null,"expected_status":200,"assertion":"returns 200 OK"}]'
+    req = RequirementSchema(modules=["Login"], risk_areas=[], priority="High", raw_input="User logs in")
+    with patch("core.llm_client.LLMClient.generate", return_value=mock_response):
+        agent = APIAgent()
+        result = agent.run_for_module("Login", req)
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert isinstance(result[0], APITestResultSchema)
+    assert result[0].method == "GET"
+
+
+def test_api_agent_handles_invalid_method():
+    from agents.api_agent import APIAgent
+    from schemas.requirement_schema import RequirementSchema
+    mock_response = '[{"method":"INVALID","endpoint":"/api/test","body":null,"expected_status":200,"assertion":"test"}]'
+    req = RequirementSchema(modules=["Test"], risk_areas=[], priority="Medium", raw_input="test")
+    with patch("core.llm_client.LLMClient.generate", return_value=mock_response):
+        agent = APIAgent()
+        result = agent.run_for_module("Test", req)
+    assert result[0].method == "GET"  # defaulted to GET
+
+
+def test_api_runner_is_async():
+    import inspect
+    from execution.runners.api_runner import run_api_test, run_api_test_sync
+    assert inspect.iscoroutinefunction(run_api_test)
+    assert not inspect.iscoroutinefunction(run_api_test_sync)
+
+
+def test_api_agent_run_all_modules():
+    from agents.api_agent import APIAgent
+    from schemas.requirement_schema import RequirementSchema
+    mock_response = '[{"method":"GET","endpoint":"/api/test","body":null,"expected_status":200,"assertion":"ok"}]'
+    req = RequirementSchema(modules=["Login", "Cart"], risk_areas=[], priority="High", raw_input="test")
+    with patch("core.llm_client.LLMClient.generate", return_value=mock_response):
+        agent = APIAgent()
+        result = agent.run(req)
+    assert isinstance(result, dict)
+    assert "Login" in result
+    assert "Cart" in result
