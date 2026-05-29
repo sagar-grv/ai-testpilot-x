@@ -262,3 +262,76 @@ def test_api_agent_run_all_modules():
     assert isinstance(result, dict)
     assert "Login" in result
     assert "Cart" in result
+
+
+# ── Task 4.2: BugAgent ───────────────────────────────────────────────────────
+
+def test_bug_agent_analyze_single_returns_schema():
+    from agents.bug_agent import BugAgent
+    from schemas.bug_schema import BugSchema
+    mock_response = '{"title":"Login button missing","severity":"High","priority":"P2","failure_signature":"NoSuchElement_login","root_cause":"Button selector changed","root_cause_confidence":0.9,"fix_suggestion":"Update to data-testid","fix_confidence":0.85,"severity_confidence":0.8}'
+    mock_db = MagicMock()
+    with patch("core.llm_client.LLMClient.generate", return_value=mock_response), \
+         patch("memory.bug_memory.BugMemory.get_similar_bugs", return_value=[]), \
+         patch("memory.bug_memory.BugMemory.store_bug"), \
+         patch("storage.db.get_session", return_value=mock_db):
+        agent = BugAgent()
+        result = agent.analyze_single("NoSuchElementException: #login-btn", "sess-001", 0)
+    assert isinstance(result, BugSchema)
+    assert result.severity == "High"
+    assert result.root_cause_confidence == 0.9
+
+
+def test_bug_agent_run_returns_bugs_and_clusters():
+    from agents.bug_agent import BugAgent
+    from schemas.execution_schema import ExecutionSchema
+    from schemas.test_result_schema import TestResultSchema
+    from schemas.bug_schema import BugClusterSchema
+    exec_schema = ExecutionSchema(
+        mode="MOCK",
+        results=[
+            TestResultSchema(tc_id="TC01", status="FAIL", duration_ms=1200,
+                             error_message="NoSuchElementException: Unable to locate element: #login"),
+            TestResultSchema(tc_id="TC02", status="PASS", duration_ms=800),
+        ],
+        total=2, passed=1, failed=1
+    )
+    mock_response = '{"title":"Login broken","severity":"High","priority":"P2","failure_signature":"NoSuchElement","root_cause":"Selector changed","root_cause_confidence":0.8,"fix_suggestion":"Update selector","fix_confidence":0.7,"severity_confidence":0.85}'
+    mock_db = MagicMock()
+    with patch("core.llm_client.LLMClient.generate", return_value=mock_response), \
+         patch("memory.bug_memory.BugMemory.get_similar_bugs", return_value=[]), \
+         patch("memory.bug_memory.BugMemory.store_bug"), \
+         patch("storage.db.get_session", return_value=mock_db):
+        agent = BugAgent()
+        bugs, clusters = agent.run(exec_schema, "sess-001")
+    assert len(bugs) == 1  # only 1 failed test
+    assert isinstance(clusters, list)
+
+
+def test_bug_agent_clusters_by_root_cause():
+    from agents.bug_agent import BugAgent
+    from schemas.bug_schema import BugSchema
+    agent = BugAgent.__new__(BugAgent)
+    bugs = [
+        BugSchema(id="B1", title="T1", severity="High", priority="P2", failure_signature="s1",
+                  root_cause="timeout waiting for element", root_cause_confidence=0.8,
+                  fix_suggestion="f", fix_confidence=0.7, severity_confidence=0.8),
+        BugSchema(id="B2", title="T2", severity="Medium", priority="P3", failure_signature="s2",
+                  root_cause="timeout on checkout page", root_cause_confidence=0.7,
+                  fix_suggestion="f", fix_confidence=0.6, severity_confidence=0.7),
+        BugSchema(id="B3", title="T3", severity="Low", priority="P4", failure_signature="s3",
+                  root_cause="selector not found", root_cause_confidence=0.9,
+                  fix_suggestion="f", fix_confidence=0.8, severity_confidence=0.9),
+    ]
+    clusters = agent._cluster_bugs(bugs)
+    timeout_cluster = next((c for c in clusters if "timeout" in c.root_cause_summary.lower()), None)
+    assert timeout_cluster is not None
+    assert timeout_cluster.count == 2
+
+
+def test_bug_agent_failure_signature_extraction():
+    from agents.bug_agent import _extract_failure_signature
+    msg = "NoSuchElementException: Unable to locate element: #login-btn"
+    sig = _extract_failure_signature(msg)
+    assert len(sig) <= 50
+    assert "_" in sig or len(sig) > 0
