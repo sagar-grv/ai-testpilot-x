@@ -391,3 +391,25 @@ def test_report_agent_run_returns_schema():
     assert isinstance(report, ReportSchema)
     assert report.decision == "GO"
     assert report.total_tests == 1
+
+
+# ── Task 5.2: AgentRegistry ──────────────────────────────────────────────────
+
+def test_agent_registry_registers_all():
+    import agents  # triggers __init__.py registration
+    from agents.registry import AgentRegistry
+    agent_names = AgentRegistry.list_agents()
+    expected = {"requirement", "testcase", "verification", "selenium", "api",
+                "execution", "bug", "healing", "report"}
+    assert expected.issubset(set(agent_names))
+
+def test_agent_registry_get():
+    from agents.registry import AgentRegistry
+    from agents.requirement_agent import RequirementAgent
+    AgentRegistry.register("requirement", RequirementAgent)
+    cls = AgentRegistry.get("requirement")
+    assert cls is RequirementAgent
+
+def test_agent_registry_get_unknown():
+    from agents.registry import AgentRegistry
+    assert AgentRegistry.get("nonexistent") is None
