@@ -1,0 +1,17 @@
+Review the following list of test cases for quality and coverage.
+
+Test Cases: {testcases_json}
+Requirements Context: {requirement_context}
+
+Analyze for:
+1. Coverage across test types (Positive/Negative/Security/Boundary/Performance)
+2. Duplicate test cases
+3. Missing edge cases
+
+Return a JSON object with:
+- coverage_score: 0.0-1.0 (1.0 = full coverage)
+- duplicate_count: number of near-duplicate test cases found
+- missing_edge_cases: list of edge case descriptions that are missing
+- passed: true if coverage_score >= 0.6 and no critical gaps
+
+Return ONLY valid JSON, no markdown.

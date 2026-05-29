@@ -1,0 +1,10 @@
+Analyze the following user story and extract structured requirements.
+User Story: {user_story}
+
+Return a JSON object with exactly these fields:
+- modules: list of feature modules (e.g. ["Login", "Cart", "Checkout"])
+- risk_areas: list of high-risk areas (e.g. ["Authentication", "Payment Flow"])
+- priority: overall priority, one of: Low, Medium, High, Critical
+- confidence_score: your confidence in this analysis (0.0 to 1.0)
+
+Return ONLY valid JSON, no markdown, no explanation.

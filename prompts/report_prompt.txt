@@ -1,0 +1,23 @@
+Generate an executive software quality report narrative.
+
+Execution Summary:
+- Total tests: {total_tests}
+- Passed: {passed}
+- Failed: {failed}
+
+Bug Summary:
+- Critical: {critical_bugs}
+- High: {high_bugs}
+- Medium: {medium_bugs}
+- Low: {low_bugs}
+
+Bug Clusters: {cluster_summary}
+
+Release Decision (already determined): {decision}
+
+Write a 2-3 sentence executive recommendation_text explaining the release decision in plain business language.
+Also provide a risk_score from 0-100 (0=no risk, 100=critical risk).
+Also provide a confidence_score for this report (0.0 to 1.0).
+
+Return a JSON object with: recommendation_text, risk_score, confidence_score
+Return ONLY valid JSON, no markdown.

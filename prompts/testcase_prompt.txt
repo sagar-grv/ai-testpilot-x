@@ -1,0 +1,19 @@
+Generate comprehensive test cases for the following software module.
+
+Module: {module_name}
+Requirements Context: {requirement_context}
+Similar Past Test Cases (for reference, avoid duplication): {rag_context}
+
+Generate test cases covering: Positive, Negative, Security, Boundary, Performance test types.
+
+Return a JSON array where each element has:
+- id: test case ID (TC01, TC02, etc.)
+- title: descriptive title
+- module: the module name
+- type: one of Positive, Negative, Security, Performance, Boundary, Accessibility
+- priority: one of Low, Medium, High, Critical
+- steps: list of step strings
+- expected_result: expected outcome string
+- confidence_score: confidence in this test case (0.0 to 1.0)
+
+Return ONLY a valid JSON array, no markdown.

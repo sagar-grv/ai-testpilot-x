@@ -1,0 +1,15 @@
+Generate a comprehensive API test suite for the following module.
+
+Module: {module_name}
+Requirements Context: {requirement_context}
+
+For each test, cover common HTTP scenarios: success cases, error cases, validation failures.
+
+Return a JSON array where each element has:
+- method: one of GET, POST, PUT, DELETE, PATCH
+- endpoint: the API path (e.g. /api/login)
+- body: request body dict (or null for GET/DELETE)
+- expected_status: expected HTTP status code (integer)
+- assertion: plain English description of what to verify
+
+Return ONLY a valid JSON array, no markdown.

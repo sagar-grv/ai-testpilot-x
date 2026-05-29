@@ -1,0 +1,14 @@
+A Selenium test failed because an element could not be found.
+
+Original selector that failed: {original_selector}
+Locator type to try: {locator_type}
+Page HTML context (if available): {html_context}
+
+Suggest a single alternative {locator_type} selector for this element.
+If you are using id: return just the id value (e.g. login-button)
+If you are using css_selector: return the full CSS selector (e.g. .login-btn)
+If you are using xpath: return the full XPath (e.g. //button[@class='login'])
+If you are using data-testid: return just the value (e.g. login-btn)
+
+Return ONLY the selector string. If you cannot suggest one, return empty string.
+No explanation, no markdown.

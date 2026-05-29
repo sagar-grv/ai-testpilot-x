@@ -1,0 +1,20 @@
+Analyze this test failure and produce a structured bug report.
+
+Failure Details:
+{failure_details}
+
+Similar Past Bugs (RAG context):
+{rag_context}
+
+Return a JSON object with exactly these fields:
+- title: short descriptive bug title
+- severity: one of Critical, High, Medium, Low
+- priority: one of P1, P2, P3, P4
+- failure_signature: short identifier for this failure type (e.g. NoSuchElementException_login_button)
+- root_cause: explanation of root cause
+- root_cause_confidence: confidence in root cause analysis (0.0 to 1.0)
+- fix_suggestion: suggested fix
+- fix_confidence: confidence in fix suggestion (0.0 to 1.0)
+- severity_confidence: confidence in severity assessment (0.0 to 1.0)
+
+Return ONLY valid JSON, no markdown.

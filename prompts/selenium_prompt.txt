@@ -1,0 +1,20 @@
+Generate a Python Selenium WebDriver test function for the following test case.
+
+Imports to use:
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+The function signature must be: def test_{tc_id}(driver):
+
+Use WebDriverWait(driver, 10) for all element waits.
+Use driver.get(target_url) as the first line.
+Return ONLY the Python function code. No markdown fences. No imports. No explanation.
+
+Test Case ID: {tc_id}
+Title: {title}
+Steps:
+{steps}
+Expected Result: {expected_result}
+Target URL hint: {target_url}
