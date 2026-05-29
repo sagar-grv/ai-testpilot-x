@@ -440,3 +440,44 @@ def test_explain_engine_returns_string():
         result = explain_decision("Priority: High, Modules: Login, Risk: Auth")
     assert isinstance(result, str)
     assert len(result) > 0
+
+
+# ── Task 6.3: Coverage Polish ────────────────────────────────────────────────
+
+def test_bug_memory_get_similar_returns_list():
+    """BugMemory must return list even on empty DB."""
+    from memory.bug_memory import BugMemory
+    mem = BugMemory()
+    result = mem.get_similar_bugs("test_signature", n=3)
+    assert isinstance(result, list)
+
+def test_event_bus_singleton():
+    """bus singleton must be the same object every import."""
+    from core.event_bus import bus as bus1
+    from core.event_bus import bus as bus2
+    assert bus1 is bus2
+
+def test_event_bus_history_grows():
+    """Emitting events grows history."""
+    from core.event_bus import bus, EventType
+    initial_count = len(bus.get_history())
+    bus.emit(EventType.AGENT_FAILED, {"test": True})
+    assert len(bus.get_history()) == initial_count + 1
+
+def test_metrics_timer_records_run():
+    """timer context manager must record a run for the agent."""
+    from monitoring.metrics import metrics, timer
+    initial_runs = metrics.get_all().get("TestAgent", None)
+    initial = initial_runs.runs if initial_runs else 0
+    with timer("TestAgent"):
+        pass
+    m = metrics.get_all().get("TestAgent")
+    assert m is not None
+    assert m.runs == initial + 1
+
+def test_rag_engine_count_returns_int():
+    from core.rag_engine import RAGEngine
+    engine = RAGEngine(path=None)
+    count = engine.count("testcases")
+    assert isinstance(count, int)
+    assert count >= 0
