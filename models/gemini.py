@@ -4,7 +4,7 @@ from models.base_model import BaseModel
 from monitoring.logger import get_logger
 
 log = get_logger(__name__)
-_MODEL_NAME = "gemini-1.5-flash"
+_MODEL_NAME = "gemini-2.5-flash"
 
 class GeminiModel(BaseModel):
     def __init__(self, model_name: str = _MODEL_NAME):
