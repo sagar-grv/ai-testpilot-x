@@ -1,30 +1,25 @@
+"""GlobalState — single source of truth for LangGraph orchestration."""
 from __future__ import annotations
-from typing import Optional, TypedDict, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from schemas.requirement_schema import RequirementSchema
-    from schemas.testcase_schema import TestCaseSchema
-    from schemas.verification_schema import VerificationSchema
-    from schemas.execution_schema import ExecutionSchema
-    from schemas.bug_schema import BugSchema, BugClusterSchema
-    from schemas.report_schema import ReportSchema
-    from schemas.error_schema import ErrorSchema
+from typing import Optional, Any
+from typing_extensions import TypedDict
 
 
 class GlobalState(TypedDict, total=False):
+    """LangGraph state dict. All fields optional (total=False) for incremental updates."""
     session_id: str
     session_metadata: dict
-    requirement_context: Optional[dict]
-    generated_testcases: Optional[list]
-    verification_report: Optional[dict]
+    # Agent outputs (stored as dicts for JSON serialization)
+    requirement_context: Optional[dict]      # RequirementSchema.model_dump()
+    generated_testcases: Optional[list]      # list[TestCaseSchema.model_dump()]
+    verification_report: Optional[dict]      # VerificationSchema.model_dump()
     execution_plan: Optional[str]
-    selenium_scripts: Optional[dict]
-    api_test_suite: Optional[dict]
-    execution_results: Optional[dict]
-    bugs: Optional[list]
-    bug_clusters: Optional[list]
-    healing_results: Optional[dict]
-    risk_analysis: Optional[dict]
-    report: Optional[dict]
+    selenium_scripts: Optional[dict]         # {tc_id: code_string}
+    api_test_suite: Optional[dict]           # {module: list[APITestResultSchema.model_dump()]}
+    execution_results: Optional[dict]        # ExecutionSchema.model_dump()
+    bugs: Optional[list]                     # list[BugSchema.model_dump()]
+    bug_clusters: Optional[list]             # list[BugClusterSchema.model_dump()]
+    healing_results: Optional[dict]          # {bug_id: healing_result_dict}
+    risk_analysis: Optional[dict]            # V2, nullable
+    report: Optional[dict]                   # ReportSchema.model_dump()
     checkpoint: Optional[dict]
-    agent_errors: Optional[list]
+    agent_errors: Optional[list]             # list[ErrorSchema.model_dump()]

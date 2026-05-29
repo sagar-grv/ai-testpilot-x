@@ -57,3 +57,12 @@ def test_report_schema():
 def test_error_schema():
     e = ErrorSchema(agent_name="RequirementAgent", error_type="RuntimeError", message="API failed", timestamp="2026-01-01")
     assert e.agent_name == "RequirementAgent"
+
+
+def test_global_state_is_typed_dict():
+    from schemas.global_state import GlobalState
+    # GlobalState is a TypedDict — test that it can be used as a type
+    state: GlobalState = {"session_id": "test-001", "session_metadata": {}}
+    assert state["session_id"] == "test-001"
+    # Optional fields should default to absent (total=False)
+    assert state.get("bugs") is None
