@@ -52,3 +52,12 @@ def test_rag_engine_ingest_dir(tmp_path):
     (tmp_path / "doc.txt").write_text("Authentication login failure test " * 50)
     count = engine.ingest_knowledge_dir("requirements", tmp_path)
     assert count > 0
+
+
+def test_rag_ingest_dir_returns_count(tmp_path):
+    from core.rag_engine import RAGEngine
+    engine = RAGEngine(path=None)
+    (tmp_path / "bugs.txt").write_text("Authentication failure on login. " * 50)
+    (tmp_path / "testcases.txt").write_text("Valid login test case. " * 50)
+    count = engine.ingest_knowledge_dir("bugs", tmp_path)
+    assert count >= 2  # at least 2 chunks from 2 files
