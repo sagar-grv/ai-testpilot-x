@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 
 def test_requirement_agent_returns_schema():
@@ -97,3 +97,44 @@ def test_verification_agent_heuristic_fallback():
     result = agent._heuristic_verify(tcs)
     assert result.coverage_score == 1.0
     assert result.passed is True
+
+
+# ── Task 3.1: SeleniumAgent ──────────────────────────────────────────────────
+
+def test_selenium_agent_returns_code_string():
+    from agents.selenium_agent import SeleniumAgent
+    from schemas.testcase_schema import TestCaseSchema
+    tc = TestCaseSchema(id="TC01", title="Valid Login", module="Login", type="Positive",
+                        priority="High", steps=["Open /login", "Enter credentials", "Click submit"],
+                        expected_result="Dashboard shown")
+    with patch("core.llm_client.LLMClient.generate", return_value="def test_TC01(driver):\n    driver.get('https://example.com')"):
+        agent = SeleniumAgent()
+        result = agent.generate_for_tc(tc)
+    assert isinstance(result, str)
+    assert "def test_TC01" in result
+
+
+def test_selenium_agent_strips_markdown_fences():
+    from agents.selenium_agent import SeleniumAgent
+    from schemas.testcase_schema import TestCaseSchema
+    tc = TestCaseSchema(id="TC01", title="T", module="M", type="Positive", priority="High",
+                        steps=["step"], expected_result="ok")
+    mock_code = "```python\ndef test_TC01(driver):\n    pass\n```"
+    with patch("core.llm_client.LLMClient.generate", return_value=mock_code):
+        agent = SeleniumAgent()
+        result = agent.generate_for_tc(tc)
+    assert "```" not in result
+
+
+def test_selenium_agent_generate_all():
+    from agents.selenium_agent import SeleniumAgent
+    from schemas.testcase_schema import TestCaseSchema
+    tcs = [
+        TestCaseSchema(id="TC01", title="T1", module="M", type="Positive", priority="High", steps=[], expected_result=""),
+        TestCaseSchema(id="TC02", title="T2", module="M", type="Negative", priority="High", steps=[], expected_result=""),
+    ]
+    with patch("core.llm_client.LLMClient.generate", return_value="def test_TC01(driver): pass"):
+        agent = SeleniumAgent()
+        result = agent.generate_all(tcs)
+    assert "TC01" in result
+    assert "TC02" in result
