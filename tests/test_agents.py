@@ -413,3 +413,19 @@ def test_agent_registry_get():
 def test_agent_registry_get_unknown():
     from agents.registry import AgentRegistry
     assert AgentRegistry.get("nonexistent") is None
+
+
+# ── Task 5.4: Orchestrator ───────────────────────────────────────────────────
+
+def test_orchestrator_builds_without_error():
+    """Orchestrator must compile without raising."""
+    import orchestrator
+    assert orchestrator.graph is not None
+
+def test_should_analyze_bugs_routing():
+    """Routing: failed tests -> bug_analysis, all pass -> report."""
+    from orchestrator import _should_analyze_bugs
+    state_with_failures = {"execution_results": {"failed": 2, "passed": 1, "total": 3, "mode": "MOCK", "results": []}}
+    state_no_failures = {"execution_results": {"failed": 0, "passed": 3, "total": 3, "mode": "MOCK", "results": []}}
+    assert _should_analyze_bugs(state_with_failures) == "bug_analysis"
+    assert _should_analyze_bugs(state_no_failures) == "report"
