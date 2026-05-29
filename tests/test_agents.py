@@ -180,3 +180,37 @@ def test_execution_agent_trust_domain_crud(tmp_path):
             # Should now be trusted
             result = s.query(TrustDomain).filter_by(domain="testdomain.com").first()
             assert result is not None
+
+
+# ── Task 3.5: HealingAgent ───────────────────────────────────────────────────
+
+def test_healing_agent_returns_dict():
+    from agents.healing_agent import HealingAgent
+    with patch("core.llm_client.LLMClient.generate", return_value="[data-testid='login-btn']"):
+        agent = HealingAgent()
+        result = agent.attempt_healing(
+            "NoSuchElementException: Unable to locate element: #login-btn",
+            "https://example.com",
+            tc_id="TC01"
+        )
+    assert isinstance(result, dict)
+    assert "tried_locators" in result
+    assert "success" in result
+    assert result["success"] is True
+    assert result["recovered_selector"] != ""
+
+
+def test_healing_agent_extracts_selector():
+    from agents.healing_agent import _extract_selector
+    msg = "NoSuchElementException: Unable to locate element: #login-button"
+    sel = _extract_selector(msg)
+    assert "#login-button" in sel
+
+
+def test_healing_agent_returns_success_false_on_empty():
+    from agents.healing_agent import HealingAgent
+    with patch("core.llm_client.LLMClient.generate", return_value=""):
+        agent = HealingAgent()
+        result = agent.attempt_healing("NoSuchElement: #btn", "https://example.com")
+    assert result["success"] is False
+    assert result["recovered_selector"] == ""
