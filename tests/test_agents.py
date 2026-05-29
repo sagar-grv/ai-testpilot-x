@@ -138,3 +138,45 @@ def test_selenium_agent_generate_all():
         result = agent.generate_all(tcs)
     assert "TC01" in result
     assert "TC02" in result
+
+
+# ── Task 3.4: ExecutionAgent ─────────────────────────────────────────────────
+
+def test_execution_agent_mock_returns_schema():
+    from agents.execution_agent import ExecutionAgent
+    from schemas.execution_schema import ExecutionSchema
+    agent = ExecutionAgent()
+    scripts = {"TC01": "def test_TC01(driver): pass", "TC02": "def test_TC02(driver): pass"}
+    result = agent.run(mode="MOCK", scripts=scripts, target_url="https://example.com", approved=True)
+    assert isinstance(result, ExecutionSchema)
+    assert result.mode == "MOCK"
+    assert result.total == 2
+    assert result.passed + result.failed == result.total
+
+
+def test_execution_agent_raises_when_not_approved():
+    from agents.execution_agent import ExecutionAgent
+    agent = ExecutionAgent()
+    with __import__("pytest").raises(ValueError, match="not approved"):
+        agent.run(mode="MOCK", scripts={"TC01": ""}, target_url="", approved=False)
+
+
+def test_execution_agent_trust_domain_crud(tmp_path):
+    from agents.execution_agent import ExecutionAgent
+    from storage.db import create_engine_and_tables
+    from sqlalchemy.orm import Session
+    from storage.models.trust_domains import TrustDomain
+    # Use in-memory DB for isolation
+    eng = create_engine_and_tables(url="sqlite:///:memory:")
+    agent = ExecutionAgent()
+    # Patch get_session to use in-memory engine
+    with patch("agents.execution_agent.get_session") as mock_session:
+        with Session(eng) as s:
+            mock_session.return_value = s
+            assert agent.check_trust_domain("testdomain.com") is False
+            agent.add_trust_domain("testdomain.com")
+        with Session(eng) as s:
+            mock_session.return_value = s
+            # Should now be trusted
+            result = s.query(TrustDomain).filter_by(domain="testdomain.com").first()
+            assert result is not None
