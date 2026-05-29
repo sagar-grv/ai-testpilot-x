@@ -335,3 +335,59 @@ def test_bug_agent_failure_signature_extraction():
     sig = _extract_failure_signature(msg)
     assert len(sig) <= 50
     assert "_" in sig or len(sig) > 0
+
+
+# ── Task 5.1: ReportAgent ────────────────────────────────────────────────────
+
+def test_report_agent_decision_no_go():
+    from agents.report_agent import ReportAgent
+    from schemas.bug_schema import BugSchema
+    agent = ReportAgent.__new__(ReportAgent)
+    bugs = [BugSchema(id="B1", title="T", severity="Critical", priority="P1",
+                      failure_signature="s", root_cause="r", root_cause_confidence=0.9,
+                      fix_suggestion="f", fix_confidence=0.8, severity_confidence=0.9)]
+    assert agent._determine_decision(bugs) == "NO_GO"
+
+def test_report_agent_decision_go_with_risk():
+    from agents.report_agent import ReportAgent
+    from schemas.bug_schema import BugSchema
+    agent = ReportAgent.__new__(ReportAgent)
+    bugs = [BugSchema(id="B1", title="T", severity="High", priority="P2",
+                      failure_signature="s", root_cause="r", root_cause_confidence=0.8,
+                      fix_suggestion="f", fix_confidence=0.7, severity_confidence=0.8)]
+    assert agent._determine_decision(bugs) == "GO_WITH_RISK"
+
+def test_report_agent_decision_go():
+    from agents.report_agent import ReportAgent
+    from schemas.bug_schema import BugSchema
+    agent = ReportAgent.__new__(ReportAgent)
+    bugs = [BugSchema(id="B1", title="T", severity="Low", priority="P4",
+                      failure_signature="s", root_cause="r", root_cause_confidence=0.6,
+                      fix_suggestion="f", fix_confidence=0.5, severity_confidence=0.6)]
+    assert agent._determine_decision(bugs) == "GO"
+
+def test_report_agent_go_when_no_bugs():
+    from agents.report_agent import ReportAgent
+    agent = ReportAgent.__new__(ReportAgent)
+    assert agent._determine_decision([]) == "GO"
+
+def test_report_agent_run_returns_schema():
+    from agents.report_agent import ReportAgent
+    from schemas.report_schema import ReportSchema
+    from schemas.execution_schema import ExecutionSchema
+    from schemas.test_result_schema import TestResultSchema
+    from schemas.bug_schema import BugSchema, BugClusterSchema
+    execution = ExecutionSchema(
+        mode="MOCK",
+        results=[TestResultSchema(tc_id="TC01", status="PASS", duration_ms=500)],
+        total=1, passed=1, failed=0
+    )
+    mock_llm = '{"recommendation_text":"All good.","risk_score":5,"confidence_score":0.9}'
+    with patch("core.llm_client.LLMClient.generate", return_value=mock_llm), \
+         patch("storage.db.get_session"), \
+         patch("core.rag_engine.rag_engine.upsert"):
+        agent = ReportAgent()
+        report = agent.run(execution, [], [], "test-session")
+    assert isinstance(report, ReportSchema)
+    assert report.decision == "GO"
+    assert report.total_tests == 1
