@@ -1,0 +1,112 @@
+site_name: AI TestPilot X
+site_description: Autonomous AI-powered QA platform and CLI — generate tests, execute Selenium, analyze bugs, GO/NO GO release decisions.
+site_url: https://sagar-grv.github.io/ai-testpilot-x/
+repo_url: https://github.com/sagar-grv/ai-testpilot-x
+repo_name: sagar-grv/ai-testpilot-x
+edit_uri: edit/master/docs/
+
+theme:
+  name: material
+  icon:
+    logo: material/robot
+  favicon: https://raw.githubusercontent.com/sagar-grv/ai-testpilot-x/master/docs/assets/logo.svg
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  font:
+    text: DM Sans
+    code: JetBrains Mono
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.footer
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - search.highlight
+    - search.suggest
+    - search.share
+    - announce.dismiss
+    - toc.follow
+
+plugins:
+  - search:
+      separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
+  - minify:
+      minify_html: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/sagar-grv/ai-testpilot-x
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/ai-testpilot-x/
+  analytics:
+    provider: google
+    property: !ENV [GOOGLE_ANALYTICS_KEY, ""]
+  version:
+    provider: mike
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - CLI Reference: cli-reference.md
+  - Python API: python-api.md
+  - Agents:
+    - Overview: agents/index.md
+    - RequirementAgent: agents/requirement-agent.md
+    - TestCaseAgent: agents/testcase-agent.md
+    - VerificationAgent: agents/verification-agent.md
+    - SeleniumAgent: agents/selenium-agent.md
+    - APIAgent: agents/api-agent.md
+    - ExecutionAgent: agents/execution-agent.md
+    - BugAgent: agents/bug-agent.md
+    - HealingAgent: agents/healing-agent.md
+    - ReportAgent: agents/report-agent.md
+  - Architecture: architecture.md
+  - Configuration: configuration.md
+  - CI/CD Integration: ci-cd.md
+  - Changelog: changelog.md

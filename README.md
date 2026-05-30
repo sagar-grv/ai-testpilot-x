@@ -3,6 +3,8 @@
 > Autonomous AI-Powered Quality Engineering Platform & CLI
 
 [![Live App](https://img.shields.io/badge/Live%20App-ai--testpilot--x.streamlit.app-FF4B4B?logo=streamlit&logoColor=white)](https://ai-testpilot-x.streamlit.app/)
+[![Docs](https://img.shields.io/badge/Docs-sagar--grv.github.io-00D9FF?logo=materialformkdocs&logoColor=white)](https://sagar-grv.github.io/ai-testpilot-x/)
+[![skills.sh](https://skills.sh/b/sagar-grv/ai-testpilot-x)](https://skills.sh/sagar-grv/ai-testpilot-x)
 [![PyPI](https://img.shields.io/badge/PyPI-ai--testpilot--x-blue?logo=pypi)](https://pypi.org/project/ai-testpilot-x/)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://python.org)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.40+-red)](https://streamlit.io)
@@ -57,6 +59,34 @@ pip install ai-testpilot-x[selenium]
 # Everything
 pip install ai-testpilot-x[all]
 ```
+
+---
+
+## Install the AI Agent Skill
+
+Any AI coding agent (Claude Code, Cursor, OpenCode, Copilot, Windsurf) can learn to
+use AI TestPilot X with a single command:
+
+```bash
+npx skills add sagar-grv/ai-testpilot-x
+```
+
+After installing, your agent understands all CLI commands, the 10-agent pipeline,
+exit code semantics, HITL gate usage, and self-healing locator patterns.
+
+Listed on [skills.sh](https://skills.sh/sagar-grv/ai-testpilot-x) — the open agent skills ecosystem.
+
+---
+
+## Documentation
+
+Full docs at **[sagar-grv.github.io/ai-testpilot-x](https://sagar-grv.github.io/ai-testpilot-x/)**:
+
+- [Getting Started](https://sagar-grv.github.io/ai-testpilot-x/getting-started/)
+- [CLI Reference](https://sagar-grv.github.io/ai-testpilot-x/cli-reference/)
+- [Architecture](https://sagar-grv.github.io/ai-testpilot-x/architecture/)
+- [CI/CD Integration](https://sagar-grv.github.io/ai-testpilot-x/ci-cd/)
+- [10-Agent Pipeline](https://sagar-grv.github.io/ai-testpilot-x/agents/)
 
 ---
 

@@ -1,0 +1,43 @@
+name: Deploy Docs to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/docs.yml'
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history for git-revision-date plugin
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install MkDocs + plugins
+        run: |
+          pip install \
+            mkdocs-material \
+            mkdocs-minify-plugin \
+            mkdocs-git-revision-date-localized-plugin
+
+      - name: Build and deploy to gh-pages
+        run: mkdocs gh-deploy --force --clean --verbose
+        env:
+          GOOGLE_ANALYTICS_KEY: ${{ secrets.GOOGLE_ANALYTICS_KEY }}
