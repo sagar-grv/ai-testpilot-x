@@ -1,8 +1,13 @@
 """Page 05 — Bug Analyzer: analyze failures with AI + RAG."""
 import streamlit as st
 
-st.set_page_config(page_title="Bug Analyzer | AI TestPilot X", layout="wide")
-st.title("Bug Analyzer")
+st.set_page_config(page_title="Bug Analyzer | AI TestPilot X", page_icon="🐛", layout="wide")
+
+st.markdown("""
+<h2 style='margin:0; font-size:26px; font-weight:700;'>🐛 Bug Analyzer</h2>
+<p style='color:#718096; margin-top:4px;'>Paste a stack trace or error log — AI identifies root cause, severity, and fix suggestion using RAG.</p>
+""", unsafe_allow_html=True)
+st.divider()
 
 # Input tabs
 tab1, tab2, tab3 = st.tabs(["Paste Log", "Upload File", "From Last Run"])

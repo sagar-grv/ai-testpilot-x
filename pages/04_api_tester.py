@@ -4,8 +4,13 @@ import json
 import asyncio
 import pandas as pd
 
-st.set_page_config(page_title="API Tester | AI TestPilot X", layout="wide")
-st.title("API Test Studio")
+st.set_page_config(page_title="API Tester | AI TestPilot X", page_icon="🌐", layout="wide")
+
+st.markdown("""
+<h2 style='margin:0; font-size:26px; font-weight:700;'>🌐 API Test Studio</h2>
+<p style='color:#718096; margin-top:4px;'>Generate HTTP test suites and optionally run them against live endpoints.</p>
+""", unsafe_allow_html=True)
+st.divider()
 
 requirement = st.session_state.get("requirement_context")
 

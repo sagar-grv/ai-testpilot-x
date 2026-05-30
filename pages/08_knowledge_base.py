@@ -3,8 +3,13 @@ import streamlit as st
 import tempfile
 from pathlib import Path
 
-st.set_page_config(page_title="Knowledge Base | AI TestPilot X", layout="wide")
-st.title("Knowledge Base")
+st.set_page_config(page_title="Knowledge Base | AI TestPilot X", page_icon="📚", layout="wide")
+
+st.markdown("""
+<h2 style='margin:0; font-size:26px; font-weight:700;'>📚 Knowledge Base</h2>
+<p style='color:#718096; margin-top:4px;'>Search, browse, and ingest documents into the ChromaDB RAG vector store.</p>
+""", unsafe_allow_html=True)
+st.divider()
 
 from core.rag_engine import rag_engine
 
