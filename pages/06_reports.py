@@ -5,6 +5,13 @@ import pandas as pd
 
 st.set_page_config(page_title="Reports | AI TestPilot X", page_icon="📈", layout="wide")
 
+# ── Inject shared CSS + sidebar ───────────────────────────────────────────────
+from pages._css import inject_css, sidebar_branding
+inject_css()
+sidebar_branding()
+
+
+
 st.markdown("""
 <h1 class="tp-page-title">📈 Reports & Analytics</h1>
 <p class="tp-page-subtitle">Executive summaries, bug analysis, and GO / NO GO release decisions.</p>

@@ -5,6 +5,13 @@ from pathlib import Path
 
 st.set_page_config(page_title="Knowledge Base | AI TestPilot X", page_icon="📚", layout="wide")
 
+# ── Inject shared CSS + sidebar ───────────────────────────────────────────────
+from pages._css import inject_css, sidebar_branding
+inject_css()
+sidebar_branding()
+
+
+
 st.markdown("""
 <h1 class="tp-page-title">📚 Knowledge Base</h1>
 <p class="tp-page-subtitle">Search, browse, and ingest documents into the ChromaDB RAG vector store.</p>

@@ -3,6 +3,13 @@ import streamlit as st
 
 st.set_page_config(page_title="Workflow Studio | AI TestPilot X", page_icon="🔀", layout="wide")
 
+# ── Inject shared CSS + sidebar ───────────────────────────────────────────────
+from pages._css import inject_css, sidebar_branding
+inject_css()
+sidebar_branding()
+
+
+
 st.markdown("""
 <h1 class="tp-page-title">🔀 Workflow Studio</h1>
 <p class="tp-page-subtitle">

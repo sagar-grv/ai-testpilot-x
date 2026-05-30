@@ -4,6 +4,13 @@ import json
 
 st.set_page_config(page_title="Home | AI TestPilot X", page_icon="📊", layout="wide")
 
+# ── Inject shared CSS + sidebar ───────────────────────────────────────────────
+from pages._css import inject_css, sidebar_branding
+inject_css()
+sidebar_branding()
+
+
+
 # ── Page header ───────────────────────────────────────────────────────────────
 st.markdown("""
 <h1 class="tp-page-title">📊 Home Dashboard</h1>
