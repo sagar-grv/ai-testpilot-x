@@ -1,0 +1,4 @@
+# System packages for Streamlit Cloud
+# SQLite is built into Python, no extra package needed
+# These are for sentence-transformers and chromadb
+libgomp1

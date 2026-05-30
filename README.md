@@ -2,11 +2,12 @@
 
 > Autonomous AI-Powered Quality Engineering Platform
 
-![Python](https://img.shields.io/badge/Python-3.11+-blue)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.40+-red)
-![LangGraph](https://img.shields.io/badge/LangGraph-0.3.x-green)
-![Gemini](https://img.shields.io/badge/Gemini-1.5--Flash-yellow)
-![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen)
+[![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://python.org)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.40+-red)](https://streamlit.io)
+[![LangGraph](https://img.shields.io/badge/LangGraph-0.3.x-green)](https://langchain-ai.github.io/langgraph/)
+[![Gemini](https://img.shields.io/badge/Gemini-2.5--Flash-yellow)](https://aistudio.google.com)
+[![Tests](https://img.shields.io/badge/Tests-72%20Passing-brightgreen)](https://github.com/sagar-grv/ai-testpilot-x)
+[![GitHub](https://img.shields.io/badge/GitHub-sagar--grv%2Fai--testpilot--x-181717?logo=github)](https://github.com/sagar-grv/ai-testpilot-x)
 
 ## Overview
 
@@ -134,6 +135,34 @@ docker-compose up -d
 | BugAgent | Root cause analysis, RAG correlation, clustering |
 | HealingAgent | Self-healing locators (ID→Name→data-*→CSS→XPath→AI) |
 | ReportAgent | GO / GO_WITH_RISK / NO_GO decision engine |
+
+## Deploy to Streamlit Cloud
+
+### One-click deploy
+
+1. Fork or push to GitHub (already done at https://github.com/sagar-grv/ai-testpilot-x)
+2. Go to **https://share.streamlit.io**
+3. Click **"New app"**
+4. Select:
+   - **Repository:** `sagar-grv/ai-testpilot-x`
+   - **Branch:** `master`
+   - **Main file:** `app.py`
+5. Click **"Advanced settings"** → **"Secrets"**
+6. Paste the contents of `.streamlit/secrets.toml.example` and fill in your `GEMINI_API_KEY`
+7. Click **"Deploy"**
+
+### Secrets to add on Streamlit Cloud
+
+```toml
+GEMINI_API_KEY = "AIzaSy..."   # Required — from aistudio.google.com/app/apikey
+EXECUTION_MODE = "MOCK"        # Required — always MOCK on cloud
+APP_ENV = "production"
+LOG_LEVEL = "INFO"
+DB_URL = "sqlite:///./testpilot.db"
+CHROMA_PATH = "./chroma_db"
+```
+
+> **Note:** `EXECUTION_MODE = "MOCK"` is required for cloud deployment because Streamlit Cloud does not have Chrome/Selenium available. All AI features (test generation, bug analysis, reports) work fully in MOCK mode.
 
 ## Resume Entry
 

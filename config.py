@@ -1,12 +1,36 @@
-"""config.py — Single source of truth for all settings (Pydantic-settings v2)."""
+"""config.py — Single source of truth for all settings (Pydantic-settings v2).
+
+Supports three sources in priority order:
+  1. Streamlit secrets (st.secrets) — when running on Streamlit Cloud
+  2. Environment variables / .env file — local development
+  3. Hard-coded defaults — fallbacks
+"""
 from __future__ import annotations
+import os
 from pathlib import Path
 from typing import Literal
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from dotenv import load_dotenv
 
+# Load .env for local dev (no-op if file doesn't exist)
 load_dotenv(dotenv_path=Path(__file__).parent / ".env", override=False)
+
+# ── Pull Streamlit secrets into env vars (cloud deployment) ───────────────────
+try:
+    import streamlit as st
+    if hasattr(st, "secrets") and len(st.secrets) > 0:
+        _secret_keys = [
+            "GEMINI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY",
+            "LANGSMITH_API_KEY", "LANGSMITH_PROJECT", "LANGSMITH_TRACING",
+            "DB_URL", "CHROMA_PATH", "EXECUTION_MODE", "SELENIUM_GRID_URL",
+            "APP_ENV", "LOG_LEVEL", "MAX_AGENT_RETRIES",
+        ]
+        for _key in _secret_keys:
+            if _key in st.secrets and _key not in os.environ:
+                os.environ[_key] = str(st.secrets[_key])
+except Exception:
+    pass  # Not running in Streamlit context — skip
 
 
 class Settings(BaseSettings):
@@ -44,7 +68,7 @@ class Settings(BaseSettings):
 
     # App
     APP_ENV: Literal["development", "production"] = Field(default="development")
-    LOG_LEVEL: str = Field(default="DEBUG")
+    LOG_LEVEL: str = Field(default="INFO")
     MAX_AGENT_RETRIES: int = Field(default=2)
     RAG_TOP_K: int = Field(default=5)
     VERIFICATION_COVERAGE_THRESHOLD: float = Field(default=0.6)
