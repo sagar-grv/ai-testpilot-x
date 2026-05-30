@@ -27,10 +27,6 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Install AI TestPilot X (from repo)
-        run: pip install -e .
-
-      # -- Option A: Use testpilot.yaml in your repo (recommended) --
       - name: Run AI quality gate
         run: |
           python -m cli.main run \
