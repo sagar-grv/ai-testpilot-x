@@ -6,7 +6,8 @@ langchain-google-genai>=2.0,<5.0
 langchain-text-splitters>=0.3,<2.0   # CVE-2026-41481: SSRF in split_text_from_url — not called in this project
 
 # Embeddings + Vector DB
-sentence-transformers>=3.0,<4.0  # requires transformers>=5.0 which fixes CVE-2026-1839
+sentence-transformers>=3.0,<4.0
+transformers>=5.0,<7.0  # CVE-2026-1839 fixed in 5.0.0rc3; 4.x vulnerable
 chromadb>=0.5,<2.0
 
 # CLI

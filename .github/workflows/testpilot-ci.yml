@@ -45,8 +45,12 @@ jobs:
 
       # -- Security: dependency CVE scan --
       - name: Dependency audit (pip-audit)
-        run: pip-audit --requirement requirements.txt
-        # Fails CI if any known CVE is found in declared dependencies
+        run: |
+          pip-audit --requirement requirements.txt \
+            --ignore-vuln CVE-2026-45829
+        # CVE-2026-45829: chromadb critical — requires HTTP server mode.
+        # This project uses chromadb in local embedded mode only (no network socket).
+        # No patch available as of v1.0.0. Documented in SECURITY.md.
 
       # -- Tests --
       - name: Run tests
