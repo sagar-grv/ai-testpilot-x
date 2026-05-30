@@ -1,5 +1,6 @@
 """Page 01 — Home Dashboard."""
 
+import html
 import streamlit as st
 import json
 
@@ -203,7 +204,7 @@ if rdata:
                 <div style="font-size:13px; color:{text}cc; margin-top:3px;">{subtitle}</div>
             </div>
         </div>
-        {f'<div style="margin-top:14px; background:rgba(0,0,0,0.25); border-radius:8px; padding:10px 16px; font-size:13px; color:{text}cc; font-style:italic;">{rdata.get("recommendation_text","")}</div>' if rdata.get("recommendation_text") else ""}
+        {f'<div style="margin-top:14px; background:rgba(0,0,0,0.25); border-radius:8px; padding:10px 16px; font-size:13px; color:{text}cc; font-style:italic;">{html.escape(str(rdata.get("recommendation_text","") or ""))}</div>' if rdata.get("recommendation_text") else ""}
     </div>""",
         unsafe_allow_html=True,
     )

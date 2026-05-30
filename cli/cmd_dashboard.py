@@ -44,6 +44,8 @@ def dashboard_cmd(
             "Make sure you're running from the ai-testpilot-x project directory."
         )
         raise typer.Exit(1)
+    # SECURITY: canonicalize path to prevent symlink-based directory traversal
+    app_path = app_path.resolve()
 
     console.print()
     console.print(

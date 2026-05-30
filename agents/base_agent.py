@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 import json
+import re
 from abc import ABC
 from pathlib import Path
 from typing import Any
@@ -12,6 +13,14 @@ from monitoring.logger import get_logger
 from schemas.error_schema import ErrorSchema
 
 log = get_logger(__name__)
+
+# Maximum input length accepted by any agent (chars).
+# Prevents token stuffing, prompt injection via oversized payloads, and
+# accidental billing explosions from unbounded stdin reads.
+MAX_INPUT_LENGTH = 15_000
+
+# Control characters and null bytes that can confuse LLM tokenizers
+_CONTROL_CHAR_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
 
 def _find_prompts_dir() -> Path:
@@ -53,6 +62,34 @@ class BaseAgent(ABC):
     def __init__(self, provider: str = "gemini"):
         self.client = LLMClient(provider=provider)
         self.log = get_logger(self.__class__.__name__)
+
+    # ------------------------------------------------------------------
+    # SECURITY: input sanitization — call before embedding user data in prompts
+    # ------------------------------------------------------------------
+    def _sanitize_input(
+        self,
+        text: str,
+        field: str = "input",
+        max_length: int = MAX_INPUT_LENGTH,
+    ) -> str:
+        """Validate and sanitize user-supplied text before use in LLM prompts.
+
+        Raises:
+            ValueError: if input exceeds max_length or is not a string.
+        """
+        if not isinstance(text, str):
+            raise ValueError(f"{field} must be a string, got {type(text).__name__}")
+        # Strip null bytes and non-printable control characters
+        cleaned = _CONTROL_CHAR_RE.sub("", text)
+        cleaned = cleaned.replace("\r\n", "\n").replace("\r", "\n")
+        cleaned = cleaned.strip()
+        if len(cleaned) > max_length:
+            raise ValueError(
+                f"{field} exceeds maximum allowed length "
+                f"({len(cleaned)} > {max_length} chars). "
+                f"Please shorten your input."
+            )
+        return cleaned
 
     def _load_prompt(self, prompt_file: str) -> str:
         path = PROMPTS_DIR / prompt_file

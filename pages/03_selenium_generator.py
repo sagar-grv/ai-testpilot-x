@@ -1,5 +1,6 @@
 """Page 03 — Selenium Script Generator with HITL gate."""
 
+import html
 import streamlit as st
 from urllib.parse import urlparse
 from config import settings
@@ -278,7 +279,7 @@ if "current_script" in st.session_state:
                                         <div style="color:#fca5a5; font-size:13px; margin-top:6px;
                                                     font-family:monospace; background:#0F1117;
                                                     padding:8px 12px; border-radius:6px; margin-top:10px;">
-                                            {(result.error_message or "Unknown error")[:160]}
+                                            {html.escape((result.error_message or "Unknown error")[:160])}
                                         </div>
                                     </div>
                                 </div>

@@ -6,6 +6,7 @@ from agents.base_agent import BaseAgent
 from schemas.execution_schema import ExecutionSchema
 from schemas.test_result_schema import TestResultSchema
 from core.event_bus import bus, EventType
+from core.code_validator import validate_generated_code, CodeValidationError
 from storage.db import get_session
 from storage.models.trust_domains import TrustDomain
 from monitoring.logger import get_logger
@@ -136,7 +137,23 @@ class ExecutionAgent(BaseAgent):
                 driver = get_grid_driver(settings.SELENIUM_GRID_URL, headless=True)
                 driver.get(target_url)
                 namespace: dict = {}
-                exec(compile(code, "<selenium_script>", "exec"), namespace)
+                # SECURITY: AST-validate LLM-generated code before exec()
+                try:
+                    validate_generated_code(code, context=tc_id)
+                except CodeValidationError as e:
+                    log.warning(f"GRID test {tc_id} blocked by code validator: {e}")
+                    results.append(
+                        TestResultSchema(
+                            tc_id=tc_id,
+                            status="ERROR",
+                            duration_ms=0.0,
+                            error_message=f"Security validation failed: {e}",
+                        )
+                    )
+                    continue
+                exec(
+                    compile(code, "<selenium_script>", "exec"), namespace
+                )  # nosec B102 - AST-validated above by validate_generated_code()
                 namespace[f"test_{tc_id}"](driver)
                 duration_ms = (time.perf_counter() - start) * 1000
                 results.append(

@@ -49,7 +49,7 @@ def _setup_file_handler() -> None:
             log_path.parent.mkdir(parents=True, exist_ok=True)
             _logger.add(
                 str(log_path),
-                level="DEBUG",
+                level=LOG_LEVEL,  # respect configured LOG_LEVEL, not hardcoded DEBUG
                 rotation="10 MB",
                 retention="7 days",
                 compression="zip",

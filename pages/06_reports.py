@@ -1,5 +1,6 @@
 """Page 06 — Reports & Analytics."""
 
+import html
 import streamlit as st
 import json
 import pandas as pd
@@ -121,7 +122,7 @@ st.markdown(
         </div>
         {"<div style='text-align:right;'><div style='font-size:11px; color:" + text + "77; margin-bottom:4px;'>Risk Score</div><div style='font-size:42px; font-weight:900; color:" + text + ";'>" + f"{rdata.get('risk_score',0):.0f}" + "</div><div style='font-size:11px; color:" + text + "77;'>out of 100</div></div>" if rdata.get("risk_score") is not None else ""}
     </div>
-    {f'<div style="margin-top:16px; background:rgba(0,0,0,0.2); border-radius:8px; padding:12px 16px; font-size:13px; color:{text}cc; font-style:italic; line-height:1.6;">{rdata.get("recommendation_text","")}</div>' if rdata.get("recommendation_text") else ""}
+    {f'<div style="margin-top:16px; background:rgba(0,0,0,0.2); border-radius:8px; padding:12px 16px; font-size:13px; color:{text}cc; font-style:italic; line-height:1.6;">{html.escape(str(rdata.get("recommendation_text","") or ""))}</div>' if rdata.get("recommendation_text") else ""}
 </div>""",
     unsafe_allow_html=True,
 )

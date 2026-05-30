@@ -37,6 +37,13 @@ def analyze_cmd(
     except Exception:
         pass
 
+    # SECURITY: validate story length before sending to LLM
+    if len(story) > 15_000:
+        console.print(
+            "[red]Error:[/red] --story exceeds maximum length of 15,000 characters."
+        )
+        raise typer.Exit(1)
+
     console.print()
     console.print(
         Panel.fit(

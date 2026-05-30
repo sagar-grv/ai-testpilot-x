@@ -1,5 +1,6 @@
 """Page 08 — Knowledge Base: browse, search, and ingest into ChromaDB."""
 
+import html
 import streamlit as st
 import tempfile
 from pathlib import Path
@@ -81,7 +82,7 @@ if query:
             f"""
         <div style="font-size:13px; color:#64748B; margin-bottom:10px;">
             Found <strong style="color:#6C63FF;">{len(results)}</strong> results in
-            <code style="background:#1E2337; padding:1px 6px; border-radius:4px;">{collection}</code>
+            <code style="background:#1E2337; padding:1px 6px; border-radius:4px;">{html.escape(collection)}</code>
         </div>""",
             unsafe_allow_html=True,
         )
@@ -141,14 +142,27 @@ with i2:
     )
 
 if ingest_btn and uploaded_files:
+    MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB per file
     prog = st.progress(0, text="Ingesting documents...")
     try:
         with tempfile.TemporaryDirectory() as tmpdir:
             for f in uploaded_files:
-                Path(tmpdir, f.name).write_bytes(f.read())
+                # SECURITY: read once, check size server-side
+                raw = f.read()
+                if len(raw) > MAX_UPLOAD_BYTES:
+                    prog.empty()
+                    st.error(
+                        f"File '{html.escape(f.name)}' exceeds 10 MB limit. Skipped."
+                    )
+                    continue
+                # SECURITY: strip directory components to prevent path traversal
+                safe_name = Path(f.name).name
+                if not safe_name:
+                    continue
+                Path(tmpdir, safe_name).write_bytes(raw)
             count = rag_engine.ingest_knowledge_dir(target_collection, tmpdir)
         prog.empty()
-        st.success(f"✅ Ingested {count} chunks into '{target_collection}'")
+        st.success(f"Ingested {count} chunks into '{html.escape(target_collection)}'")
         st.rerun()
     except Exception as e:
         prog.empty()

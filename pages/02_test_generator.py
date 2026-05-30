@@ -118,6 +118,7 @@ user_story = st.text_area(
     height=96,
     label_visibility="collapsed",
     key="user_story_input",
+    max_chars=5_000,
 )
 
 btn_col, clear_col = st.columns([2, 6])

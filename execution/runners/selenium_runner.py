@@ -5,6 +5,7 @@ import time
 from pathlib import Path
 from schemas.test_result_schema import TestResultSchema
 from monitoring.logger import get_logger
+from core.code_validator import validate_generated_code, CodeValidationError
 
 log = get_logger(__name__)
 SCREENSHOTS_DIR = Path("execution/artifacts/screenshots")
@@ -52,7 +53,20 @@ def run_test(
         driver.get(target_url)
 
         namespace: dict = {}
-        exec(compile(code, "<selenium_script>", "exec"), namespace)
+        # SECURITY: AST-validate LLM-generated code before exec()
+        try:
+            validate_generated_code(code, context=tc_id)
+        except CodeValidationError as e:
+            log.warning(f"Test {tc_id} blocked by code validator: {e}")
+            return TestResultSchema(
+                tc_id=tc_id,
+                status="ERROR",
+                duration_ms=0.0,
+                error_message=f"Security validation failed: {e}",
+            )
+        exec(
+            compile(code, "<selenium_script>", "exec"), namespace
+        )  # nosec B102 - AST-validated above by validate_generated_code()
         fn_name = f"test_{tc_id}"
         if fn_name not in namespace:
             raise ValueError(f"Function {fn_name} not found in generated code")

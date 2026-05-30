@@ -23,11 +23,32 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Install dev tools
-        run: pip install ruff black pytest-html
-      - name: Lint
+        run: pip install ruff black pytest-html bandit pip-audit
+
+      # -- Code quality --
+      - name: Lint (ruff)
         run: ruff check . --ignore E501,E402
-      - name: Format check
+      - name: Format check (black)
         run: black --check .
+
+      # -- Security: static analysis --
+      - name: Security scan (bandit)
+        run: |
+          bandit -r . \
+            --exclude ./site,./dist,./build,./.pytest_tmp,./chroma_db,./chroma_ci \
+            --severity-level medium \
+            --confidence-level high \
+            -f txt
+        # Fails CI if any MEDIUM+ severity, HIGH confidence issue is found
+        # exec() calls in execution_agent.py and selenium_runner.py are now
+        # AST-validated before use — acceptable managed risk; annotate if needed.
+
+      # -- Security: dependency CVE scan --
+      - name: Dependency audit (pip-audit)
+        run: pip-audit --requirement requirements.txt
+        # Fails CI if any known CVE is found in declared dependencies
+
+      # -- Tests --
       - name: Run tests
         run: pytest tests/ -v --html=report.html --self-contained-html
       - uses: actions/upload-artifact@v4

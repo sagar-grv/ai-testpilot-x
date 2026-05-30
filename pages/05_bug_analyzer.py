@@ -1,5 +1,6 @@
 """Page 05 — Bug Analyzer with AI + RAG."""
 
+import html
 import streamlit as st
 
 st.set_page_config(
@@ -37,16 +38,26 @@ with tab1:
         height=140,
         label_visibility="collapsed",
         key="paste_log",
+        max_chars=20_000,
     )
 
 with tab2:
     uploaded = st.file_uploader("Upload a log file (.txt or .log)", type=["txt", "log"])
     if uploaded:
-        log_text = uploaded.read().decode("utf-8", errors="ignore")
-        st.success(f"Loaded {len(log_text)} characters from {uploaded.name}")
-        st.code(
-            log_text[:500] + ("..." if len(log_text) > 500 else ""), language="text"
-        )
+        # SECURITY: cap upload size server-side (10 MB)
+        MAX_LOG_BYTES = 10 * 1024 * 1024
+        raw_bytes = uploaded.read()
+        if len(raw_bytes) > MAX_LOG_BYTES:
+            st.error("File exceeds 10 MB limit.")
+            uploaded = None
+        else:
+            log_text = raw_bytes.decode("utf-8", errors="ignore")
+            st.success(
+                f"Loaded {len(log_text)} characters from {html.escape(uploaded.name)}"
+            )
+            st.code(
+                log_text[:500] + ("..." if len(log_text) > 500 else ""), language="text"
+            )
 
 with tab3:
     exec_results = st.session_state.get("execution_results")
@@ -59,12 +70,14 @@ with tab3:
             sel = next(r for r in failed_tests if r.tc_id == sel_id)
             log_text = sel.error_message or ""
             if log_text:
+                # SECURITY: html.escape() prevents XSS from error message content
+                safe_log_preview = html.escape(log_text[:300])
                 st.markdown(
                     f"""
                 <div style="background:#0F1117; border:1px solid #1E2337; border-radius:8px;
                             padding:12px 14px; font-family:monospace; font-size:12px;
                             color:#94A3B8; white-space:pre-wrap; word-break:break-all;">
-                    {log_text[:300]}{"..." if len(log_text) > 300 else ""}
+                    {safe_log_preview}{"..." if len(log_text) > 300 else ""}
                 </div>""",
                     unsafe_allow_html=True,
                 )
@@ -91,6 +104,10 @@ with analyze_col:
     )
 
 if analyze_btn and log_text.strip():
+    # SECURITY: enforce max input length before sending to LLM
+    if len(log_text) > 20_000:
+        st.error("Input too long (max 20,000 characters). Please truncate the log.")
+        st.stop()
     with st.spinner("AI analyzing failure with RAG correlation..."):
         try:
             from agents.bug_agent import BugAgent
@@ -158,7 +175,7 @@ if bug:
         st.markdown(
             f"""
         <div class="tp-card" style="margin-bottom:12px; min-height:80px;">
-            <div style="font-size:13px; color:#CBD5E1; line-height:1.6;">{bug.root_cause}</div>
+            <div style="font-size:13px; color:#CBD5E1; line-height:1.6;">{html.escape(bug.root_cause)}</div>
         </div>""",
             unsafe_allow_html=True,
         )
@@ -177,7 +194,7 @@ if bug:
         st.markdown(
             f"""
         <div class="tp-card" style="margin-bottom:12px; min-height:80px;">
-            <div style="font-size:13px; color:#CBD5E1; line-height:1.6;">{bug.fix_suggestion}</div>
+            <div style="font-size:13px; color:#CBD5E1; line-height:1.6;">{html.escape(bug.fix_suggestion)}</div>
         </div>""",
             unsafe_allow_html=True,
         )

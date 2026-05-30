@@ -36,6 +36,10 @@ class BugAgent(BaseAgent):
         self, error_message: str, session_id: str, index: int = 0
     ) -> BugSchema:
         """Analyze one failure. Returns BugSchema."""
+        # SECURITY: sanitize user-controlled error log before embedding in LLM prompt
+        error_message = self._sanitize_input(
+            error_message, field="error_message", max_length=20_000
+        )
         self.log.info(f"BugAgent.analyze_single | session={session_id} | index={index}")
         signature = _extract_failure_signature(error_message)
 

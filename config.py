@@ -119,7 +119,7 @@ class Settings(BaseSettings):
     SELENIUM_HEADLESS: bool = Field(default=True)
 
     # App
-    APP_ENV: Literal["development", "production"] = Field(default="development")
+    APP_ENV: Literal["development", "production"] = Field(default="production")
     LOG_LEVEL: str = Field(default="WARNING")
     MAX_AGENT_RETRIES: int = Field(default=2)
     RAG_TOP_K: int = Field(default=5)

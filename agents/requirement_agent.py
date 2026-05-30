@@ -13,6 +13,8 @@ class RequirementAgent(BaseAgent):
     agent_name = "RequirementAgent"
 
     def run(self, user_story: str) -> RequirementSchema:
+        # SECURITY: sanitize user-controlled input before embedding in LLM prompt
+        user_story = self._sanitize_input(user_story, field="user_story")
         self.log.info(f"RequirementAgent.run | story_len={len(user_story)}")
         prompt_template = self._load_prompt("requirement_prompt.txt")
         prompt = prompt_template.format(user_story=user_story)

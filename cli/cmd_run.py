@@ -64,6 +64,13 @@ def run_cmd(
     """
     _load_project_config()
 
+    # SECURITY: validate story length before any processing
+    if len(story) > 15_000:
+        console.print(
+            "[red]Error:[/red] --story exceeds maximum length of 15,000 characters."
+        )
+        raise typer.Exit(1)
+
     # Apply overrides
     if mode or url:
         from config import configure

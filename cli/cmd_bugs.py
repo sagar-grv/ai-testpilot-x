@@ -62,7 +62,9 @@ def bugs_cmd(
         import sys
 
         if not sys.stdin.isatty():
-            log_text = sys.stdin.read()
+            # SECURITY: cap stdin read to prevent memory exhaustion from huge pipes
+            MAX_STDIN_BYTES = 20 * 1024 * 1024  # 20 MB
+            log_text = sys.stdin.read(MAX_STDIN_BYTES)
         else:
             console.print(
                 "[red]Error:[/red] Provide --log TEXT or --log FILE, or pipe stdin."
@@ -72,6 +74,14 @@ def bugs_cmd(
     if not log_text.strip():
         console.print("[red]Error:[/red] Empty log text.")
         raise typer.Exit(1)
+
+    # SECURITY: validate log length before sending to LLM
+    if len(log_text) > 20_000:
+        console.print(
+            f"[yellow]Warning:[/yellow] Log text truncated to 20,000 characters "
+            f"(was {len(log_text):,})."
+        )
+        log_text = log_text[:20_000]
 
     console.print()
     console.print(
