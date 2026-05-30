@@ -1,5 +1,5 @@
 from __future__ import annotations
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import String, Integer, DateTime, Text
 from sqlalchemy.orm import Mapped, mapped_column
 from storage.db import Base
@@ -15,4 +15,4 @@ class ExecutionRecord(Base):
     results_json: Mapped[str] = mapped_column(Text, default="[]")
     screenshots_json: Mapped[str] = mapped_column(Text, default="[]")
     logs_json: Mapped[str] = mapped_column(Text, default="[]")
-    executed_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    executed_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))

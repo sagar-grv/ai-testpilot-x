@@ -47,11 +47,11 @@ def test_bug_cluster_schema():
     assert c.count == 1
 
 def test_report_schema():
-    from datetime import datetime
+    from datetime import datetime, timezone
     r = ReportSchema(session_id="s1", total_tests=10, passed=8, failed=2,
                      critical_bugs=0, high_bugs=1, medium_bugs=1, low_bugs=0,
                      decision="GO_WITH_RISK", recommendation_text="Risk present",
-                     risk_score=45.0, created_at=datetime.utcnow().isoformat())
+                     risk_score=45.0, created_at=datetime.now(timezone.utc).isoformat())
     assert r.decision == "GO_WITH_RISK"
 
 def test_error_schema():

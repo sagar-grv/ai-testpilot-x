@@ -1,6 +1,6 @@
 """ReportAgent — generates GO/GO_WITH_RISK/NO_GO release decision + executive summary."""
 from __future__ import annotations
-from datetime import datetime
+from datetime import datetime, timezone
 from agents.base_agent import BaseAgent
 from schemas.report_schema import ReportSchema
 from schemas.bug_schema import BugSchema, BugClusterSchema
@@ -75,7 +75,7 @@ class ReportAgent(BaseAgent):
             decision=decision,
             recommendation_text=recommendation,
             risk_score=risk_score,
-            created_at=datetime.utcnow().isoformat(),
+            created_at=datetime.now(timezone.utc).isoformat(),
             confidence_score=confidence,
         )
 
@@ -90,7 +90,7 @@ class ReportAgent(BaseAgent):
                 decision=decision,
                 summary=recommendation,
                 report_json=json.dumps(report.model_dump()),
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(timezone.utc),
             ))
             db.commit()
             db.close()

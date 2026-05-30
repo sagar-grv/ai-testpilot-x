@@ -1,44 +1,71 @@
-"""config.py — Single source of truth for all settings."""
+"""config.py — Single source of truth for all settings (Pydantic-settings v2)."""
 from __future__ import annotations
-import os
 from pathlib import Path
 from typing import Literal
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from dotenv import load_dotenv
 
 load_dotenv(dotenv_path=Path(__file__).parent / ".env", override=False)
 
-from pydantic import Field
-from pydantic_settings import BaseSettings
-
 
 class Settings(BaseSettings):
-    GEMINI_API_KEY: str = Field(default="", env="GEMINI_API_KEY")
-    OPENAI_API_KEY: str = Field(default="", env="OPENAI_API_KEY")
-    ANTHROPIC_API_KEY: str = Field(default="", env="ANTHROPIC_API_KEY")
-    LANGSMITH_API_KEY: str = Field(default="", env="LANGSMITH_API_KEY")
-    LANGSMITH_PROJECT: str = Field(default="ai-testpilot-x", env="LANGSMITH_PROJECT")
-    LANGSMITH_TRACING: bool = Field(default=False, env="LANGSMITH_TRACING")
-    DB_URL: str = Field(default="sqlite:///./testpilot.db", env="DB_URL")
-    CHROMA_PATH: str = Field(default="./chroma_db", env="CHROMA_PATH")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+        case_sensitive=False,
+    )
+
+    # LLM
+    GEMINI_API_KEY: str = Field(default="")
+    OPENAI_API_KEY: str = Field(default="")
+    ANTHROPIC_API_KEY: str = Field(default="")
+
+    # LangSmith
+    LANGSMITH_API_KEY: str = Field(default="")
+    LANGSMITH_PROJECT: str = Field(default="ai-testpilot-x")
+    LANGSMITH_TRACING: bool = Field(default=False)
+
+    # Database
+    DB_URL: str = Field(default="sqlite:///./testpilot.db")
+
+    # ChromaDB
+    CHROMA_PATH: str = Field(default="./chroma_db")
     CHROMA_COLLECTION_TESTCASES: str = Field(default="testcases")
     CHROMA_COLLECTION_BUGS: str = Field(default="bugs")
     CHROMA_COLLECTION_REQUIREMENTS: str = Field(default="requirements")
     CHROMA_COLLECTION_REPORTS: str = Field(default="reports")
-    EXECUTION_MODE: Literal["LOCAL", "MOCK", "GRID"] = Field(default="MOCK", env="EXECUTION_MODE")
-    SELENIUM_GRID_URL: str = Field(default="http://localhost:4444/wd/hub", env="SELENIUM_GRID_URL")
-    SELENIUM_HEADLESS: bool = Field(default=True, env="SELENIUM_HEADLESS")
-    APP_ENV: Literal["development", "production"] = Field(default="development", env="APP_ENV")
-    LOG_LEVEL: str = Field(default="DEBUG", env="LOG_LEVEL")
-    MAX_AGENT_RETRIES: int = Field(default=2, env="MAX_AGENT_RETRIES")
-    RAG_TOP_K: int = Field(default=5, env="RAG_TOP_K")
+
+    # Execution
+    EXECUTION_MODE: Literal["LOCAL", "MOCK", "GRID"] = Field(default="MOCK")
+    SELENIUM_GRID_URL: str = Field(default="http://localhost:4444/wd/hub")
+    SELENIUM_HEADLESS: bool = Field(default=True)
+
+    # App
+    APP_ENV: Literal["development", "production"] = Field(default="development")
+    LOG_LEVEL: str = Field(default="DEBUG")
+    MAX_AGENT_RETRIES: int = Field(default=2)
+    RAG_TOP_K: int = Field(default=5)
     VERIFICATION_COVERAGE_THRESHOLD: float = Field(default=0.6)
     VERIFICATION_LOW_CONFIDENCE_MAX: float = Field(default=0.30)
-    BASE_DIR: Path = Path(__file__).parent
-    PROMPTS_DIR: Path = BASE_DIR / "prompts"
-    KNOWLEDGE_DIR: Path = BASE_DIR / "knowledge"
-    ARTIFACTS_DIR: Path = BASE_DIR / "execution" / "artifacts"
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
+    # Paths (computed, not from env)
+    @property
+    def BASE_DIR(self) -> Path:
+        return Path(__file__).parent
+
+    @property
+    def PROMPTS_DIR(self) -> Path:
+        return self.BASE_DIR / "prompts"
+
+    @property
+    def KNOWLEDGE_DIR(self) -> Path:
+        return self.BASE_DIR / "knowledge"
+
+    @property
+    def ARTIFACTS_DIR(self) -> Path:
+        return self.BASE_DIR / "execution" / "artifacts"
 
 
 settings = Settings()

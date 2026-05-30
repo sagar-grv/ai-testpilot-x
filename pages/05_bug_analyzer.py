@@ -1,112 +1,215 @@
-"""Page 05 — Bug Analyzer: analyze failures with AI + RAG."""
+"""Page 05 — Bug Analyzer with AI + RAG."""
 import streamlit as st
 
 st.set_page_config(page_title="Bug Analyzer | AI TestPilot X", page_icon="🐛", layout="wide")
 
 st.markdown("""
-<h2 style='margin:0; font-size:26px; font-weight:700;'>🐛 Bug Analyzer</h2>
-<p style='color:#718096; margin-top:4px;'>Paste a stack trace or error log — AI identifies root cause, severity, and fix suggestion using RAG.</p>
+<h1 class="tp-page-title">🐛 Bug Analyzer</h1>
+<p class="tp-page-subtitle">
+    Paste any error log or stack trace — AI identifies root cause, severity, and fix using RAG-backed analysis.
+</p>
 """, unsafe_allow_html=True)
 st.divider()
 
-# Input tabs
-tab1, tab2, tab3 = st.tabs(["Paste Log", "Upload File", "From Last Run"])
+# ── Input ─────────────────────────────────────────────────────────────────────
+st.markdown('<div class="tp-section-title">Input</div>', unsafe_allow_html=True)
+
+tab1, tab2, tab3 = st.tabs(["📋 Paste Log", "📁 Upload File", "🔍 From Last Run"])
 
 log_text = ""
 with tab1:
-    log_text = st.text_area("Paste error log or stack trace", height=150, key="paste_log")
+    log_text = st.text_area(
+        "Paste error log",
+        placeholder="NoSuchElementException: Unable to locate element: #login-btn\n  at LoginPage.py:42...",
+        height=140,
+        label_visibility="collapsed",
+        key="paste_log"
+    )
 
 with tab2:
-    uploaded = st.file_uploader("Upload log file", type=["txt", "log"])
+    uploaded = st.file_uploader("Upload a log file (.txt or .log)", type=["txt", "log"])
     if uploaded:
         log_text = uploaded.read().decode("utf-8", errors="ignore")
+        st.success(f"Loaded {len(log_text)} characters from {uploaded.name}")
+        st.code(log_text[:500] + ("..." if len(log_text) > 500 else ""), language="text")
 
 with tab3:
     exec_results = st.session_state.get("execution_results")
     if exec_results:
-        failed = [r for r in exec_results.results if r.status in ("FAIL", "ERROR")]
-        if failed:
-            sel_fail = st.selectbox("Select failed test", [r.tc_id for r in failed])
-            sel = next(r for r in failed if r.tc_id == sel_fail)
-            log_text = sel.error_message
-            st.code(log_text)
+        failed_tests = [r for r in exec_results.results if r.status in ("FAIL", "ERROR")]
+        if failed_tests:
+            sel_id = st.selectbox("Select failed test", [r.tc_id for r in failed_tests])
+            sel = next(r for r in failed_tests if r.tc_id == sel_id)
+            log_text = sel.error_message or ""
+            if log_text:
+                st.markdown(f"""
+                <div style="background:#0F1117; border:1px solid #1E2337; border-radius:8px;
+                            padding:12px 14px; font-family:monospace; font-size:12px;
+                            color:#94A3B8; white-space:pre-wrap; word-break:break-all;">
+                    {log_text[:300]}{"..." if len(log_text) > 300 else ""}
+                </div>""", unsafe_allow_html=True)
         else:
-            st.info("No failed tests in last run")
+            st.success("✅ No failed tests in last run!")
     else:
-        st.info("No execution results. Run tests on Selenium Generator first.")
+        st.markdown("""
+        <div style="background:#0F1117; border:1px dashed #1E2337; border-radius:10px;
+                    padding:20px; text-align:center; color:#334155; font-size:13px;">
+            No execution results yet. Run tests on the Selenium Generator page first.
+        </div>""", unsafe_allow_html=True)
 
-# Analyze
-if st.button("Analyze Bug", type="primary", disabled=not log_text.strip()):
-    with st.spinner("AI analyzing failure..."):
+st.markdown("<br>", unsafe_allow_html=True)
+analyze_col, _ = st.columns([2, 6])
+with analyze_col:
+    analyze_btn = st.button(
+        "🔍 Analyze with AI",
+        type="primary",
+        disabled=not (log_text or "").strip(),
+        use_container_width=True
+    )
+
+if analyze_btn and log_text.strip():
+    with st.spinner("AI analyzing failure with RAG correlation..."):
         try:
             from agents.bug_agent import BugAgent
             session_id = st.session_state.get("session_id", "demo")
-            agent = BugAgent()
-            bug = agent.analyze_single(log_text, session_id=session_id)
+            bug = BugAgent().analyze_single(log_text, session_id=session_id)
             st.session_state["current_bug"] = bug
+            st.rerun()
         except Exception as e:
             st.error(f"Analysis failed: {e}")
 
-# Display bug report
+# ── Bug Report ────────────────────────────────────────────────────────────────
 bug = st.session_state.get("current_bug")
 if bug:
-    severity_icons = {"Critical": "🔴", "High": "🟠", "Medium": "🟡", "Low": "🟢"}
-    icon = severity_icons.get(bug.severity, "⚪")
+    st.divider()
 
-    # KPI cards
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Severity", f"{icon} {bug.severity}")
-    col2.metric("Priority", bug.priority)
-    col3.metric("Root Cause Conf.", f"{bug.root_cause_confidence:.0%}")
-    col4.metric("Fix Confidence", f"{bug.fix_confidence:.0%}")
+    SEV_STYLES = {
+        "Critical": ("#450a0a", "#ef4444", "#fca5a5", "🔴"),
+        "High":     ("#431407", "#f97316", "#fdba74", "🟠"),
+        "Medium":   ("#422006", "#f59e0b", "#fde68a", "🟡"),
+        "Low":      ("#052e16", "#22c55e", "#bbf7d0", "🟢"),
+    }
+    sb, sa, st2, sicon = SEV_STYLES.get(bug.severity, ("#1e293b", "#94a3b8", "#cbd5e1", "⚪"))
+
+    # Severity header band
+    st.markdown(f"""
+    <div style="background:{sb}; border:1px solid {sa}44; border-radius:12px;
+                padding:18px 22px; margin-bottom:20px;
+                display:flex; align-items:center; gap:14px;">
+        <span style="font-size:36px;">{sicon}</span>
+        <div>
+            <div style="font-size:11px; color:{st2}88; font-weight:700;
+                        text-transform:uppercase; letter-spacing:0.1em;">Bug Report</div>
+            <div style="font-size:22px; font-weight:800; color:{st2};">
+                {bug.severity} Severity &nbsp;·&nbsp; {bug.priority}</div>
+            <div style="font-size:13px; color:{st2}99; margin-top:3px;">
+                {bug.title}</div>
+        </div>
+        <div style="margin-left:auto; text-align:right;">
+            <div style="font-size:11px; color:{st2}66;">Bug ID</div>
+            <div style="font-family:monospace; font-size:13px; color:{st2}99;">{bug.id}</div>
+        </div>
+    </div>""", unsafe_allow_html=True)
 
     # Failure signature
-    st.subheader("Failure Signature")
-    st.code(bug.failure_signature)
+    st.markdown('<div class="tp-section-title">Failure Signature</div>', unsafe_allow_html=True)
+    st.code(bug.failure_signature, language="text")
 
-    # Root cause + fix
-    col_l, col_r = st.columns(2)
-    with col_l:
-        st.subheader("Root Cause")
-        st.write(bug.root_cause)
-        st.progress(bug.root_cause_confidence, text=f"Confidence: {bug.root_cause_confidence:.0%}")
-    with col_r:
-        st.subheader("Fix Suggestion")
-        st.write(bug.fix_suggestion)
-        st.progress(bug.fix_confidence, text=f"Confidence: {bug.fix_confidence:.0%}")
+    # Root cause + Fix side by side
+    rc_col, fix_col = st.columns(2)
+    with rc_col:
+        st.markdown("""
+        <div style="font-size:13px; font-weight:700; color:#F0F4FF; margin-bottom:10px;">
+            🔍 Root Cause</div>""", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="tp-card" style="margin-bottom:12px; min-height:80px;">
+            <div style="font-size:13px; color:#CBD5E1; line-height:1.6;">{bug.root_cause}</div>
+        </div>""", unsafe_allow_html=True)
+        st.progress(bug.root_cause_confidence,
+                    text=f"Root cause confidence: {bug.root_cause_confidence:.0%}")
+
+    with fix_col:
+        st.markdown("""
+        <div style="font-size:13px; font-weight:700; color:#F0F4FF; margin-bottom:10px;">
+            🔧 Fix Suggestion</div>""", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="tp-card" style="margin-bottom:12px; min-height:80px;">
+            <div style="font-size:13px; color:#CBD5E1; line-height:1.6;">{bug.fix_suggestion}</div>
+        </div>""", unsafe_allow_html=True)
+        st.progress(bug.fix_confidence,
+                    text=f"Fix confidence: {bug.fix_confidence:.0%}")
+
+    # Confidence breakdown
+    st.markdown('<div class="tp-section-title">Confidence Breakdown</div>', unsafe_allow_html=True)
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Root Cause", f"{bug.root_cause_confidence:.0%}")
+    c2.metric("Fix Suggestion", f"{bug.fix_confidence:.0%}")
+    c3.metric("Severity", f"{bug.severity_confidence:.0%}")
 
     # RAG matches
     if bug.rag_matches:
-        st.subheader("Similar Past Bugs (RAG)")
-        for match in bug.rag_matches[:5]:
-            similarity = 1.0 - float(match.get("distance", 0.5))
-            with st.expander(f"{match.get('id', 'unknown')} — Similarity: {similarity:.0%}"):
-                st.write(match.get("text", "")[:200])
+        st.markdown('<div class="tp-section-title">Similar Past Bugs (RAG)</div>',
+                    unsafe_allow_html=True)
+        for i, match in enumerate(bug.rag_matches[:5]):
+            similarity = max(0.0, 1.0 - float(match.get("distance", 0.5)))
+            sim_color = "#22c55e" if similarity > 0.7 else "#f59e0b" if similarity > 0.4 else "#64748B"
+            with st.expander(
+                f"Match #{i+1}  ·  Similarity: {similarity:.0%}  ·  {match.get('id','unknown')}"
+            ):
+                st.markdown(f"""
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                    <div style="flex:1; height:6px; background:#1E2337; border-radius:3px; overflow:hidden;">
+                        <div style="width:{similarity*100:.0f}%; height:100%;
+                                    background:{sim_color}; border-radius:3px;"></div>
+                    </div>
+                    <span style="color:{sim_color}; font-weight:700; font-size:12px;">
+                        {similarity:.0%}</span>
+                </div>""", unsafe_allow_html=True)
+                st.write(match.get("text", "")[:250])
                 if match.get("metadata"):
                     st.json(match["metadata"])
 
     # Actions
     st.divider()
-    col_h, col_e = st.columns(2)
-    if col_h.button("Send to Healing Agent"):
+    act1, act2 = st.columns(2)
+    if act1.button("🔧 Send to Healing Agent", use_container_width=True, type="primary"):
         st.session_state["healing_bug"] = bug
-        st.success("Bug sent to Healing Agent. Navigate to Selenium Generator.")
-    if col_e.button("Export Bug Report"):
-        report_md = f"""# Bug Report
+        st.success("Sent to Healing Agent. Navigate to **Selenium Generator** to apply the fix.")
+    if act2.button("⬇ Export Bug Report (Markdown)", use_container_width=True):
+        md = f"""# Bug Report — {bug.id}
 
-**ID:** {bug.id}
-**Severity:** {bug.severity}
-**Priority:** {bug.priority}
+**Severity:** {bug.severity}  
+**Priority:** {bug.priority}  
+**Confidence:** {bug.severity_confidence:.0%}
 
 ## Failure Signature
-`{bug.failure_signature}`
+```
+{bug.failure_signature}
+```
 
 ## Root Cause
 {bug.root_cause}
+
 *Confidence: {bug.root_cause_confidence:.0%}*
 
 ## Fix Suggestion
 {bug.fix_suggestion}
+
 *Confidence: {bug.fix_confidence:.0%}*
 """
-        st.download_button("Download bug_report.md", report_md, "bug_report.md", "text/markdown")
+        st.download_button("Download bug_report.md", md, "bug_report.md", "text/markdown",
+                           use_container_width=True)
+
+else:
+    if not log_text.strip():
+        st.markdown("""
+        <div style="background:#0F1117; border:1px dashed #1E2337; border-radius:14px;
+                    padding:48px 32px; text-align:center;">
+            <div style="font-size:48px; margin-bottom:12px;">🐛</div>
+            <div style="font-size:18px; font-weight:700; color:#F0F4FF; margin-bottom:8px;">
+                Ready to analyze</div>
+            <div style="font-size:13px; color:#475569; max-width:360px; margin:0 auto;">
+                Paste a stack trace or error log above, then click
+                <strong style="color:#6C63FF;">Analyze with AI</strong>.
+            </div>
+        </div>""", unsafe_allow_html=True)

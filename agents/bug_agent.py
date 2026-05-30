@@ -2,7 +2,7 @@
 from __future__ import annotations
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from agents.base_agent import BaseAgent
 from schemas.bug_schema import BugSchema, BugClusterSchema
 from schemas.execution_schema import ExecutionSchema
@@ -103,7 +103,7 @@ class BugAgent(BaseAgent):
                 fix_suggestion=bug.fix_suggestion,
                 fix_confidence=bug.fix_confidence,
                 severity_confidence=bug.severity_confidence,
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(timezone.utc),
             ))
             db.commit()
             db.close()
