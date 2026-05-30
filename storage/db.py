@@ -12,12 +12,13 @@ class Base(DeclarativeBase):
 def create_engine_and_tables(url: str | None = None):
     db_url = url or settings.DB_URL
     engine = create_engine(db_url, echo=False, future=True)
-    import storage.models.requirements
-    import storage.models.testcases
-    import storage.models.executions
-    import storage.models.bugs
-    import storage.models.reports
-    import storage.models.trust_domains
+    # Side-effect imports: register models with Base.metadata before create_all
+    import storage.models.requirements  # noqa: F401
+    import storage.models.testcases  # noqa: F401
+    import storage.models.executions  # noqa: F401
+    import storage.models.bugs  # noqa: F401
+    import storage.models.reports  # noqa: F401
+    import storage.models.trust_domains  # noqa: F401
     Base.metadata.create_all(engine)
     return engine
 

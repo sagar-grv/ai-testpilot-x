@@ -79,7 +79,7 @@ def bugs_cmd(
         console=console,
         transient=True,
     ) as prog:
-        t = prog.add_task("Analyzing with AI + RAG correlation...", total=None)
+        prog.add_task("Analyzing with AI + RAG correlation...", total=None)
         from agents.bug_agent import BugAgent
         bug = BugAgent().analyze_single(log_text, session_id=sid)
 

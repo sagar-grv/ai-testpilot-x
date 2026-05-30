@@ -1,6 +1,5 @@
 """Stores current execution run state."""
 from __future__ import annotations
-from typing import Any
 
 class ExecutionMemory:
     def __init__(self):

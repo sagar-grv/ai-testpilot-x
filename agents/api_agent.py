@@ -1,6 +1,5 @@
 """APIAgent — generates API test suites, optionally executes them."""
 from __future__ import annotations
-import json
 from agents.base_agent import BaseAgent
 from schemas.api_test_schema import APITestResultSchema
 from schemas.requirement_schema import RequirementSchema

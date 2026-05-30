@@ -1,6 +1,5 @@
 """testpilot dashboard — Launch the Streamlit visual dashboard."""
 from __future__ import annotations
-from typing import Optional
 import typer
 from rich.console import Console
 
@@ -17,7 +16,9 @@ def dashboard_cmd(
     Requires the [ui] extra: [cyan]pip install ai-testpilot-x[ui][/cyan]
     """
     try:
-        import streamlit
+        import importlib.util
+        if importlib.util.find_spec("streamlit") is None:
+            raise ImportError("streamlit not found")
     except ImportError:
         console.print(
             "[red]Streamlit is not installed.[/red]\n\n"

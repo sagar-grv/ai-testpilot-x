@@ -286,7 +286,6 @@ def test_bug_agent_run_returns_bugs_and_clusters():
     from agents.bug_agent import BugAgent
     from schemas.execution_schema import ExecutionSchema
     from schemas.test_result_schema import TestResultSchema
-    from schemas.bug_schema import BugClusterSchema
     exec_schema = ExecutionSchema(
         mode="MOCK",
         results=[
@@ -376,7 +375,6 @@ def test_report_agent_run_returns_schema():
     from schemas.report_schema import ReportSchema
     from schemas.execution_schema import ExecutionSchema
     from schemas.test_result_schema import TestResultSchema
-    from schemas.bug_schema import BugSchema, BugClusterSchema
     execution = ExecutionSchema(
         mode="MOCK",
         results=[TestResultSchema(tc_id="TC01", status="PASS", duration_ms=500)],
@@ -396,7 +394,6 @@ def test_report_agent_run_returns_schema():
 # ── Task 5.2: AgentRegistry ──────────────────────────────────────────────────
 
 def test_agent_registry_registers_all():
-    import agents  # triggers __init__.py registration
     from agents.registry import AgentRegistry
     agent_names = AgentRegistry.list_agents()
     expected = {"requirement", "testcase", "verification", "selenium", "api",

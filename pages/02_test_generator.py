@@ -54,7 +54,7 @@ def _step_indicator(active):
                          color:{color};">{label}</span>
         </div>""")
         if i < len(steps) - 1:
-            parts.append(f'<div style="flex:1; height:1px; background:#1E2337; margin:0 4px;"></div>')
+            parts.append('<div style="flex:1; height:1px; background:#1E2337; margin:0 4px;"></div>')
     return f'<div style="display:flex; align-items:center; gap:4px; margin-bottom:24px;">{"".join(parts)}</div>'
 
 # Determine active step

@@ -1,12 +1,10 @@
 """BugAgent — analyzes test failures, correlates with RAG, clusters by root cause."""
 from __future__ import annotations
-import json
 import re
 from datetime import datetime, timezone
 from agents.base_agent import BaseAgent
 from schemas.bug_schema import BugSchema, BugClusterSchema
 from schemas.execution_schema import ExecutionSchema
-from schemas.test_result_schema import TestResultSchema
 from core.event_bus import bus, EventType
 from memory.bug_memory import BugMemory
 from config import settings

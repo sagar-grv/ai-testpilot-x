@@ -83,7 +83,6 @@ with h3:
         settings.EXECUTION_MODE, exec_detail, exec_ok), unsafe_allow_html=True)
 
 try:
-    import agents
     from agents.registry import AgentRegistry
     n = len(AgentRegistry.list_agents())
     reg_ok = n > 0

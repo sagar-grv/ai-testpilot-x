@@ -1,15 +1,13 @@
 """BaseAgent — shared interface for all AI TestPilot X agents."""
 from __future__ import annotations
 import json
-import time
-from abc import ABC, abstractmethod
+from abc import ABC
 from pathlib import Path
 from typing import Any
 from datetime import datetime, timezone
 from core.llm_client import LLMClient
 from core.event_bus import bus, EventType
 from monitoring.logger import get_logger
-from monitoring.metrics import timer
 from schemas.error_schema import ErrorSchema
 
 log = get_logger(__name__)

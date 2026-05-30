@@ -47,7 +47,6 @@ def test_rag_engine_upsert_and_query():
 
 def test_rag_engine_ingest_dir(tmp_path):
     from core.rag_engine import RAGEngine
-    from pathlib import Path
     engine = RAGEngine(path=None)
     (tmp_path / "doc.txt").write_text("Authentication login failure test " * 50)
     count = engine.ingest_knowledge_dir("requirements", tmp_path)

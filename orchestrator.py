@@ -6,7 +6,7 @@ Graph flow:
   → execution → (bug_analysis | report) → (healing | report) → report → END
 """
 from __future__ import annotations
-from typing import Any, Callable
+from typing import Callable
 from langgraph.graph import StateGraph, END, START
 from langgraph.checkpoint.memory import MemorySaver
 from schemas.global_state import GlobalState
@@ -18,7 +18,8 @@ log = get_logger(__name__)
 # ─── HITL approval function ───────────────────────────────────────────────────
 # Default: always approve (used in CLI / headless mode).
 # Override via build_graph(approval_fn=...) for UI-gated approval.
-_DEFAULT_APPROVAL_FN: Callable[[], bool] = lambda: True
+def _DEFAULT_APPROVAL_FN() -> bool:
+    return True
 
 
 # ─── Node implementations ────────────────────────────────────────────────────
@@ -193,7 +194,7 @@ def build_graph(approval_fn: Callable[[], bool] | None = None):
     builder.add_node("execution", _run_execution)
     builder.add_node("bug_analysis", _run_bug_analysis)
     builder.add_node("healing", _run_healing)
-    builder.add_node("report", _run_report)
+    builder.add_node("reporting", _run_report)
 
     # Edges
     builder.add_edge(START, "requirement")
@@ -204,10 +205,10 @@ def build_graph(approval_fn: Callable[[], bool] | None = None):
     builder.add_edge("selenium", "hitl_gate")
     builder.add_edge("api", "hitl_gate")
     builder.add_edge("hitl_gate", "execution")
-    builder.add_conditional_edges("execution", _should_analyze_bugs, {"bug_analysis": "bug_analysis", "report": "report"})
-    builder.add_conditional_edges("bug_analysis", _should_heal, {"healing": "healing", "report": "report"})
-    builder.add_edge("healing", "report")
-    builder.add_edge("report", END)
+    builder.add_conditional_edges("execution", _should_analyze_bugs, {"bug_analysis": "bug_analysis", "report": "reporting"})
+    builder.add_conditional_edges("bug_analysis", _should_heal, {"healing": "healing", "report": "reporting"})
+    builder.add_edge("healing", "reporting")
+    builder.add_edge("reporting", END)
 
     memory = MemorySaver()
     graph = builder.compile(checkpointer=memory)

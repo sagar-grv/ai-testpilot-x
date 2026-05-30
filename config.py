@@ -9,7 +9,7 @@ Priority order:
 from __future__ import annotations
 import os
 from pathlib import Path
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from dotenv import load_dotenv

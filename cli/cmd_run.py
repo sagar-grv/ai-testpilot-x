@@ -1,6 +1,5 @@
 """testpilot run — Full AI QA pipeline with Rich terminal output."""
 from __future__ import annotations
-import sys
 import json
 import time
 import uuid
@@ -12,8 +11,6 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
-from rich.text import Text
-from rich import print as rprint
 
 console = Console()
 
@@ -79,7 +76,7 @@ def run_cmd(
     console.print()
 
     # ── Run pipeline with per-stage progress ──────────────────────────────────
-    stages = {
+    _stages = {
         "Analyzing requirements": None,
         "Generating test cases": None,
         "Verifying coverage": None,

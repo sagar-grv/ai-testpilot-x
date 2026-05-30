@@ -82,7 +82,6 @@ def analyze(user_story: str) -> list:
     """
     from agents.requirement_agent import RequirementAgent
     from agents.testcase_agent import TestCaseAgent
-    from agents.verification_agent import VerificationAgent
 
     req = RequirementAgent().run(user_story)
     test_cases = TestCaseAgent().run(req)

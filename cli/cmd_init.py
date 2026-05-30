@@ -6,7 +6,6 @@ import typer
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
 from rich.panel import Panel
-from rich import print as rprint
 
 console = Console()
 
@@ -124,9 +123,9 @@ log_level: WARNING
     console.print()
     console.print(Panel(
         "[green]✓[/green] [bold]AI TestPilot X initialized![/bold]\n\n"
-        f"[dim]Created:[/dim] [cyan]testpilot.yaml[/cyan]\n"
-        f"[dim]Created:[/dim] [cyan].testpilot/[/cyan] (reports, artifacts, db)\n"
-        f"[dim]Updated:[/dim] [cyan].gitignore[/cyan]\n\n"
+        "[dim]Created:[/dim] [cyan]testpilot.yaml[/cyan]\n"
+        "[dim]Created:[/dim] [cyan].testpilot/[/cyan] (reports, artifacts, db)\n"
+        "[dim]Updated:[/dim] [cyan].gitignore[/cyan]\n\n"
         "[bold]Next steps:[/bold]\n"
         "  [cyan]testpilot run --story \"User can login and checkout\"[/cyan]\n"
         "  [cyan]testpilot analyze --story \"User can reset password\"[/cyan]\n"
