@@ -1,14 +1,14 @@
 [build-system]
-requires = ["setuptools>=70", "setuptools-scm>=8"]
-build-backend = "setuptools.backends.legacy:build"
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "ai-testpilot-x"
 version = "1.0.0"
-description = "Autonomous AI-powered QA CLI — generate tests, run Selenium, analyze bugs, get GO/NO GO release decisions"
+description = "Autonomous AI-powered QA CLI - generate tests, run Selenium, analyze bugs, get GO/NO GO release decisions"
 readme = "README.md"
 license = {text = "MIT"}
-authors = [{name = "sagar-grv", email = ""}]
+authors = [{name = "sagar-grv"}]
 keywords = ["testing", "qa", "automation", "ai", "selenium", "llm", "langchain"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -95,9 +95,11 @@ dev = [
 testpilot = "cli.main:app"
 
 [project.urls]
-Homepage = "https://ai-testpilot-x.streamlit.app/"
+Homepage = "https://sagar-grv.github.io/ai-testpilot-x/"
+Documentation = "https://sagar-grv.github.io/ai-testpilot-x/"
 Repository = "https://github.com/sagar-grv/ai-testpilot-x"
 "Bug Tracker" = "https://github.com/sagar-grv/ai-testpilot-x/issues"
+Changelog = "https://sagar-grv.github.io/ai-testpilot-x/changelog/"
 
 [tool.setuptools.packages.find]
 where = ["."]

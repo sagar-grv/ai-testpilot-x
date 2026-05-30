@@ -1,0 +1,49 @@
+name: Publish to PyPI
+
+# Triggers on a version tag push: git tag v1.0.0 && git push --tags
+on:
+  push:
+    tags:
+      - "v*"
+
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+
+jobs:
+  build-and-publish:
+    name: Build and publish to PyPI
+    runs-on: ubuntu-latest
+    environment: pypi-release
+
+    # Trusted Publishing (OIDC) — no stored PyPI token needed.
+    # One-time setup: go to pypi.org -> Your account -> Publishing ->
+    # Add a new pending publisher:
+    #   Owner:      sagar-grv
+    #   Repository: ai-testpilot-x
+    #   Workflow:   publish.yml
+    #   Environment: pypi-release
+    permissions:
+      id-token: write   # required for trusted publishing
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build tools
+        run: pip install build twine
+
+      - name: Build sdist and wheel
+        run: python -m build
+
+      - name: Check distribution
+        run: twine check dist/*
+
+      - name: Publish to PyPI (Trusted Publishing)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        # No username/password needed — uses OIDC trusted publishing
