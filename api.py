@@ -22,6 +22,7 @@ Quick start::
     bug = analyze_bug("NoSuchElementException: #login-btn at LoginPage.py:42")
     print(bug.severity, bug.fix_suggestion)
 """
+
 from __future__ import annotations
 from typing import Any
 
@@ -95,6 +96,7 @@ def analyze_requirements(user_story: str):
         :class:`schemas.requirement_schema.RequirementSchema`
     """
     from agents.requirement_agent import RequirementAgent
+
     return RequirementAgent().run(user_story)
 
 
@@ -110,10 +112,13 @@ def analyze_bug(error_log: str, session_id: str = "api") -> Any:
         fix_suggestion, and confidence scores.
     """
     from agents.bug_agent import BugAgent
+
     return BugAgent().analyze_single(error_log, session_id=session_id)
 
 
-def generate_report(execution_results, bugs=None, clusters=None, session_id: str = "api"):
+def generate_report(
+    execution_results, bugs=None, clusters=None, session_id: str = "api"
+):
     """Generate a release report from execution results.
 
     Args:
@@ -150,6 +155,7 @@ def configure(**kwargs) -> None:
     All keyword arguments become uppercase environment variables.
     """
     from config import configure as _configure
+
     _configure(**kwargs)
 
 
@@ -167,12 +173,23 @@ __version__ = "1.0.0"
 __author__ = "sagar-grv"
 __all__ = [
     # Functions
-    "run_pipeline", "analyze", "analyze_requirements",
-    "analyze_bug", "generate_report", "configure",
+    "run_pipeline",
+    "analyze",
+    "analyze_requirements",
+    "analyze_bug",
+    "generate_report",
+    "configure",
     # Schemas
-    "RequirementSchema", "TestCaseSchema", "VerificationSchema",
-    "ExecutionSchema", "BugSchema", "BugClusterSchema",
-    "ReportSchema", "APITestResultSchema", "TestResultSchema",
+    "RequirementSchema",
+    "TestCaseSchema",
+    "VerificationSchema",
+    "ExecutionSchema",
+    "BugSchema",
+    "BugClusterSchema",
+    "ReportSchema",
+    "APITestResultSchema",
+    "TestResultSchema",
     # Meta
-    "__version__", "__author__",
+    "__version__",
+    "__author__",
 ]

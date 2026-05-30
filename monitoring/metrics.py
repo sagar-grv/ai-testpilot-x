@@ -1,8 +1,10 @@
 """In-process metrics collector."""
+
 from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 from typing import Dict, List
+
 
 @dataclass
 class AgentMetric:
@@ -19,6 +21,7 @@ class AgentMetric:
     @property
     def error_rate(self) -> float:
         return self.errors / self.runs if self.runs else 0.0
+
 
 class MetricsCollector:
     def __init__(self):
@@ -40,7 +43,9 @@ class MetricsCollector:
     def reset(self):
         self._agents.clear()
 
+
 metrics = MetricsCollector()
+
 
 class timer:
     def __init__(self, agent_name: str):
@@ -57,5 +62,7 @@ class timer:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         elapsed = (time.perf_counter() - self._start) * 1000
-        metrics.record_run(self.agent_name, elapsed, error=self.error or exc_type is not None)
+        metrics.record_run(
+            self.agent_name, elapsed, error=self.error or exc_type is not None
+        )
         return False

@@ -1,4 +1,5 @@
 """Synchronous in-process event bus."""
+
 from __future__ import annotations
 from collections import defaultdict
 from enum import Enum
@@ -6,6 +7,7 @@ from typing import Any, Callable
 from monitoring.logger import get_logger
 
 log = get_logger(__name__)
+
 
 class EventType(str, Enum):
     REQUIREMENT_ANALYZED = "REQUIREMENT_ANALYZED"
@@ -18,6 +20,7 @@ class EventType(str, Enum):
     REPORT_GENERATED = "REPORT_GENERATED"
     AGENT_FAILED = "AGENT_FAILED"
 
+
 class EventBus:
     def __init__(self):
         self._listeners: dict[EventType, list[Callable]] = defaultdict(list)
@@ -27,6 +30,7 @@ class EventBus:
         def decorator(fn: Callable):
             self._listeners[event_type].append(fn)
             return fn
+
         return decorator
 
     def subscribe(self, event_type: EventType, fn: Callable):
@@ -48,5 +52,6 @@ class EventBus:
 
     def clear_history(self):
         self._history.clear()
+
 
 bus = EventBus()

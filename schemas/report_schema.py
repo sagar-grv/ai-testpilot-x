@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Literal
 from pydantic import BaseModel
 
+
 class ReportSchema(BaseModel):
     session_id: str
     total_tests: int

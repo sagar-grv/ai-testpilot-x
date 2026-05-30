@@ -1,6 +1,7 @@
 from __future__ import annotations
 from pydantic import BaseModel
 
+
 class VerificationSchema(BaseModel):
     coverage_score: float
     duplicate_count: int

@@ -29,6 +29,10 @@ jobs:
 
       - name: Run AI quality gate
         run: |
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "GEMINI_API_KEY not set — skipping AI quality gate (add secret to enable)"
+            exit 0
+          fi
           python -m cli.main run \
             --story "User should be able to login and checkout successfully" \
             --mode MOCK

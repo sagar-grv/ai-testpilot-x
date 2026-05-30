@@ -1,4 +1,5 @@
 """Selenium test runner — LOCAL mode execution."""
+
 from __future__ import annotations
 import time
 from pathlib import Path
@@ -13,6 +14,7 @@ try:
     from selenium import webdriver
     from selenium.webdriver.chrome.service import Service
     from webdriver_manager.chrome import ChromeDriverManager
+
     _SELENIUM_AVAILABLE = True
 except ImportError:
     webdriver = None  # type: ignore[assignment]
@@ -21,13 +23,19 @@ except ImportError:
     _SELENIUM_AVAILABLE = False
 
 
-def run_test(tc_id: str, code: str, target_url: str, headless: bool = True) -> TestResultSchema:
+def run_test(
+    tc_id: str, code: str, target_url: str, headless: bool = True
+) -> TestResultSchema:
     """Execute a generated Selenium test function. Returns TestResultSchema."""
     SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
 
     if not _SELENIUM_AVAILABLE or webdriver is None:
-        return TestResultSchema(tc_id=tc_id, status="ERROR", duration_ms=0.0,
-                                error_message="Selenium not installed")
+        return TestResultSchema(
+            tc_id=tc_id,
+            status="ERROR",
+            duration_ms=0.0,
+            error_message="Selenium not installed",
+        )
 
     options = webdriver.ChromeOptions()
     if headless:
@@ -60,13 +68,19 @@ def run_test(tc_id: str, code: str, target_url: str, headless: bool = True) -> T
         if driver:
             try:
                 from core.screenshot_utils import capture_screenshot
+
                 ss_path = str(SCREENSHOTS_DIR / f"{tc_id}_failure.png")
                 screenshot_path = capture_screenshot(driver, ss_path)
             except Exception:
                 pass
         log.error(f"Test {tc_id} FAILED: {e}")
-        return TestResultSchema(tc_id=tc_id, status="FAIL", duration_ms=duration_ms,
-                                error_message=str(e), screenshot_path=screenshot_path)
+        return TestResultSchema(
+            tc_id=tc_id,
+            status="FAIL",
+            duration_ms=duration_ms,
+            error_message=str(e),
+            screenshot_path=screenshot_path,
+        )
     finally:
         if driver:
             try:

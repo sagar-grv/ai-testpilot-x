@@ -1,4 +1,5 @@
 """AgentRegistry — pluggable agent routing."""
+
 from __future__ import annotations
 from monitoring.logger import get_logger
 

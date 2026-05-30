@@ -1,4 +1,5 @@
 """HealingAgent — recovers broken Selenium selectors using locator hierarchy."""
+
 from __future__ import annotations
 import re
 from agents.base_agent import BaseAgent
@@ -7,7 +8,15 @@ from monitoring.logger import get_logger
 
 log = get_logger(__name__)
 
-LOCATOR_HIERARCHY = ["id", "name", "data-testid", "data-cy", "css_selector", "xpath", "semantic_ai"]
+LOCATOR_HIERARCHY = [
+    "id",
+    "name",
+    "data-testid",
+    "data-cy",
+    "css_selector",
+    "xpath",
+    "semantic_ai",
+]
 
 
 def _extract_selector(error_message: str) -> str:
@@ -49,20 +58,31 @@ class HealingAgent(BaseAgent):
                 # Remove any surrounding quotes
                 suggestion = suggestion.strip("'\"")
             except Exception as e:
-                self.log.warning(f"HealingAgent LLM call failed for {locator_type}: {e}")
+                self.log.warning(
+                    f"HealingAgent LLM call failed for {locator_type}: {e}"
+                )
                 suggestion = ""
 
-            entry = {"type": locator_type, "suggestion": suggestion, "tried": bool(suggestion)}
+            entry = {
+                "type": locator_type,
+                "suggestion": suggestion,
+                "tried": bool(suggestion),
+            }
             tried_locators.append(entry)
 
             if suggestion:
                 recovered_selector = suggestion
                 success = True
                 confidence = 0.8
-                self.log.info(f"HealingAgent recovered via {locator_type}: {suggestion}")
+                self.log.info(
+                    f"HealingAgent recovered via {locator_type}: {suggestion}"
+                )
                 break
 
-        bus.emit(EventType.HEALING_COMPLETE, {"success": success, "recovered": recovered_selector})
+        bus.emit(
+            EventType.HEALING_COMPLETE,
+            {"success": success, "recovered": recovered_selector},
+        )
         return {
             "tc_id": tc_id,
             "original_selector": original_selector,

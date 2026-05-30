@@ -3,6 +3,7 @@ from typing import Literal
 from pydantic import BaseModel
 from schemas.test_result_schema import TestResultSchema
 
+
 class ExecutionSchema(BaseModel):
     mode: Literal["LOCAL", "MOCK", "GRID"]
     results: list[TestResultSchema]

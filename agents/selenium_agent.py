@@ -1,4 +1,5 @@
 """SeleniumAgent — generates Python Selenium code per test case."""
+
 from __future__ import annotations
 from agents.base_agent import BaseAgent
 from schemas.testcase_schema import TestCaseSchema
@@ -34,7 +35,9 @@ class SeleniumAgent(BaseAgent):
         self.scripts[tc.id] = code
         return code
 
-    def generate_all(self, test_cases: list[TestCaseSchema], target_url: str = "") -> dict[str, str]:
+    def generate_all(
+        self, test_cases: list[TestCaseSchema], target_url: str = ""
+    ) -> dict[str, str]:
         """Generate scripts for all test cases. Returns {tc_id: code}."""
         for tc in test_cases:
             self.generate_for_tc(tc, target_url)

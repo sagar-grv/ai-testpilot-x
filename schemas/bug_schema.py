@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Literal
 from pydantic import BaseModel
 
+
 class BugSchema(BaseModel):
     id: str
     title: str
@@ -14,6 +15,7 @@ class BugSchema(BaseModel):
     fix_confidence: float
     severity_confidence: float
     rag_matches: list[dict] = []
+
 
 class BugClusterSchema(BaseModel):
     cluster_id: str

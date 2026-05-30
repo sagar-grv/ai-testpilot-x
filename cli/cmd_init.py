@@ -1,4 +1,5 @@
 """testpilot init — Initialize a testpilot.yaml config in the current project."""
+
 from __future__ import annotations
 import os
 from pathlib import Path
@@ -11,8 +12,12 @@ console = Console()
 
 
 def init_cmd(
-    force: bool = typer.Option(False, "--force", "-f",
-        help="Overwrite existing testpilot.yaml without prompting.")
+    force: bool = typer.Option(
+        False,
+        "--force",
+        "-f",
+        help="Overwrite existing testpilot.yaml without prompting.",
+    )
 ):
     """Initialize AI TestPilot X in the current directory.
 
@@ -22,16 +27,16 @@ def init_cmd(
     config_path = Path.cwd() / "testpilot.yaml"
 
     console.print()
-    console.print(Panel.fit(
-        "[bold cyan]AI TestPilot X[/bold cyan] · Project Setup",
-        border_style="cyan"
-    ))
+    console.print(
+        Panel.fit(
+            "[bold cyan]AI TestPilot X[/bold cyan] · Project Setup", border_style="cyan"
+        )
+    )
     console.print()
 
     if config_path.exists() and not force:
         overwrite = Confirm.ask(
-            "[yellow]testpilot.yaml already exists. Overwrite?[/yellow]",
-            default=False
+            "[yellow]testpilot.yaml already exists. Overwrite?[/yellow]", default=False
         )
         if not overwrite:
             console.print("[dim]Aborted — existing config kept.[/dim]")
@@ -44,8 +49,10 @@ def init_cmd(
 
     existing_key = os.environ.get("GEMINI_API_KEY", "")
     if existing_key and existing_key.startswith("AIzaSy"):
-        console.print(f"[green]✓[/green] Found GEMINI_API_KEY in environment: "
-                       f"[dim]{existing_key[:12]}...[/dim]")
+        console.print(
+            f"[green]✓[/green] Found GEMINI_API_KEY in environment: "
+            f"[dim]{existing_key[:12]}...[/dim]"
+        )
         gemini_key = "${GEMINI_API_KEY}"
     else:
         gemini_key = Prompt.ask(
@@ -121,16 +128,18 @@ log_level: WARNING
 
     # ── Success ───────────────────────────────────────────────────────────────
     console.print()
-    console.print(Panel(
-        "[green]✓[/green] [bold]AI TestPilot X initialized![/bold]\n\n"
-        "[dim]Created:[/dim] [cyan]testpilot.yaml[/cyan]\n"
-        "[dim]Created:[/dim] [cyan].testpilot/[/cyan] (reports, artifacts, db)\n"
-        "[dim]Updated:[/dim] [cyan].gitignore[/cyan]\n\n"
-        "[bold]Next steps:[/bold]\n"
-        "  [cyan]testpilot run --story \"User can login and checkout\"[/cyan]\n"
-        "  [cyan]testpilot analyze --story \"User can reset password\"[/cyan]\n"
-        "  [cyan]testpilot dashboard[/cyan]  ← Launch visual UI",
-        border_style="green",
-        title="Setup Complete",
-    ))
+    console.print(
+        Panel(
+            "[green]✓[/green] [bold]AI TestPilot X initialized![/bold]\n\n"
+            "[dim]Created:[/dim] [cyan]testpilot.yaml[/cyan]\n"
+            "[dim]Created:[/dim] [cyan].testpilot/[/cyan] (reports, artifacts, db)\n"
+            "[dim]Updated:[/dim] [cyan].gitignore[/cyan]\n\n"
+            "[bold]Next steps:[/bold]\n"
+            '  [cyan]testpilot run --story "User can login and checkout"[/cyan]\n'
+            '  [cyan]testpilot analyze --story "User can reset password"[/cyan]\n'
+            "  [cyan]testpilot dashboard[/cyan]  ← Launch visual UI",
+            border_style="green",
+            title="Setup Complete",
+        )
+    )
     console.print()

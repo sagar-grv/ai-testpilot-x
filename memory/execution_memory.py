@@ -1,5 +1,7 @@
 """Stores current execution run state."""
+
 from __future__ import annotations
+
 
 class ExecutionMemory:
     def __init__(self):
@@ -18,5 +20,6 @@ class ExecutionMemory:
 
     def get_session(self) -> str:
         return self._current_session
+
 
 execution_memory = ExecutionMemory()

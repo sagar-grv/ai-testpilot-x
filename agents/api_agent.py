@@ -1,4 +1,5 @@
 """APIAgent — generates API test suites, optionally executes them."""
+
 from __future__ import annotations
 from agents.base_agent import BaseAgent
 from schemas.api_test_schema import APITestResultSchema
@@ -13,7 +14,9 @@ _VALID_METHODS = {"GET", "POST", "PUT", "DELETE", "PATCH"}
 class APIAgent(BaseAgent):
     agent_name = "APIAgent"
 
-    def run_for_module(self, module_name: str, requirement: RequirementSchema | None) -> list[APITestResultSchema]:
+    def run_for_module(
+        self, module_name: str, requirement: RequirementSchema | None
+    ) -> list[APITestResultSchema]:
         """Generate API tests for one module."""
         self.log.info(f"APIAgent.run_for_module | module={module_name}")
         req_context = requirement.raw_input if requirement else "No additional context."
@@ -32,19 +35,25 @@ class APIAgent(BaseAgent):
                 method = str(item.get("method", "GET")).upper()
                 if method not in _VALID_METHODS:
                     method = "GET"
-                results.append(APITestResultSchema(
-                    method=method,
-                    endpoint=str(item.get("endpoint", "/")),
-                    body=item.get("body") or {},
-                    expected_status=int(item.get("expected_status", 200)),
-                    assertion=str(item.get("assertion", "")),
-                ))
+                results.append(
+                    APITestResultSchema(
+                        method=method,
+                        endpoint=str(item.get("endpoint", "/")),
+                        body=item.get("body") or {},
+                        expected_status=int(item.get("expected_status", 200)),
+                        assertion=str(item.get("assertion", "")),
+                    )
+                )
             except Exception as e:
                 self.log.warning(f"APIAgent skipping malformed item: {e}")
-        self.log.info(f"APIAgent complete | module={module_name} | count={len(results)}")
+        self.log.info(
+            f"APIAgent complete | module={module_name} | count={len(results)}"
+        )
         return results
 
-    def run(self, requirement: RequirementSchema) -> dict[str, list[APITestResultSchema]]:
+    def run(
+        self, requirement: RequirementSchema
+    ) -> dict[str, list[APITestResultSchema]]:
         """Generate API tests for all modules."""
         modules = requirement.modules if requirement.modules else ["Default"]
         suite: dict[str, list[APITestResultSchema]] = {}

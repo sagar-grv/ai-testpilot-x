@@ -1,4 +1,5 @@
 """RequirementAgent — parses user story into structured RequirementSchema."""
+
 from __future__ import annotations
 from agents.base_agent import BaseAgent
 from schemas.requirement_schema import RequirementSchema
@@ -24,6 +25,9 @@ class RequirementAgent(BaseAgent):
             confidence_score=float(data.get("confidence_score", 0.7)),
             raw_input=user_story,
         )
-        bus.emit(EventType.REQUIREMENT_ANALYZED, {"modules": schema.modules, "priority": schema.priority})
+        bus.emit(
+            EventType.REQUIREMENT_ANALYZED,
+            {"modules": schema.modules, "priority": schema.priority},
+        )
         self.log.info(f"RequirementAgent complete | modules={schema.modules}")
         return schema

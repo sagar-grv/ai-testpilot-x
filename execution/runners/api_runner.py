@@ -1,4 +1,5 @@
 """API test runner — executes HTTP tests against a real base URL."""
+
 from __future__ import annotations
 import asyncio
 import time
@@ -24,7 +25,9 @@ async def run_api_test(base_url: str, test: APITestResultSchema) -> APITestResul
         test.response_body = resp.text[:2000]
         test.response_time_ms = (time.perf_counter() - start) * 1000
         test.passed = resp.status_code == test.expected_status
-        log.info(f"API test {test.method} {test.endpoint} -> {resp.status_code} ({'PASS' if test.passed else 'FAIL'})")
+        log.info(
+            f"API test {test.method} {test.endpoint} -> {resp.status_code} ({'PASS' if test.passed else 'FAIL'})"
+        )
     except Exception as e:
         test.response_time_ms = (time.perf_counter() - start) * 1000
         test.response_body = str(e)

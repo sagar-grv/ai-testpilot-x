@@ -1,9 +1,11 @@
 """LangSmith tracing setup."""
+
 import os
 from config import settings
 from monitoring.logger import get_logger
 
 log = get_logger(__name__)
+
 
 def configure_tracing():
     if not settings.LANGSMITH_TRACING or not settings.LANGSMITH_API_KEY:

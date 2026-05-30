@@ -4,6 +4,7 @@ from sqlalchemy import String, Integer, DateTime, Text
 from sqlalchemy.orm import Mapped, mapped_column
 from storage.db import Base
 
+
 class ExecutionRecord(Base):
     __tablename__ = "executions"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -15,4 +16,6 @@ class ExecutionRecord(Base):
     results_json: Mapped[str] = mapped_column(Text, default="[]")
     screenshots_json: Mapped[str] = mapped_column(Text, default="[]")
     logs_json: Mapped[str] = mapped_column(Text, default="[]")
-    executed_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+    executed_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc)
+    )

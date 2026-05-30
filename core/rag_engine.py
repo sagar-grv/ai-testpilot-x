@@ -1,4 +1,5 @@
 """ChromaDB-backed RAG engine."""
+
 from __future__ import annotations
 import chromadb
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
@@ -9,6 +10,7 @@ log = get_logger(__name__)
 _EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 _COLLECTIONS = ["testcases", "bugs", "requirements", "reports"]
 
+
 class RAGEngine:
     def __init__(self, path: str | None = "auto"):
         if path is None:
@@ -18,30 +20,38 @@ class RAGEngine:
             self._client = chromadb.PersistentClient(path=chroma_path)
         self._ef = SentenceTransformerEmbeddingFunction(model_name=_EMBEDDING_MODEL)
         for name in _COLLECTIONS:
-            self._client.get_or_create_collection(name=name, embedding_function=self._ef)
+            self._client.get_or_create_collection(
+                name=name, embedding_function=self._ef
+            )
         log.info(f"RAGEngine initialized | collections={_COLLECTIONS}")
 
     def list_collections(self) -> list[str]:
         return [c.name for c in self._client.list_collections()]
 
-    def upsert(self, collection: str, doc_id: str, text: str, metadata: dict | None = None) -> None:
+    def upsert(
+        self, collection: str, doc_id: str, text: str, metadata: dict | None = None
+    ) -> None:
         col = self._client.get_collection(collection, embedding_function=self._ef)
         col.upsert(documents=[text], ids=[doc_id], metadatas=[metadata or {}])
         log.debug(f"RAG upsert | collection={collection} | id={doc_id}")
 
-    def query(self, collection: str, query_text: str, n: int | None = None) -> list[dict]:
+    def query(
+        self, collection: str, query_text: str, n: int | None = None
+    ) -> list[dict]:
         n = n or settings.RAG_TOP_K
         try:
             col = self._client.get_collection(collection, embedding_function=self._ef)
             results = col.query(query_texts=[query_text], n_results=n)
             out = []
             for i, doc_id in enumerate(results["ids"][0]):
-                out.append({
-                    "id": doc_id,
-                    "text": results["documents"][0][i],
-                    "metadata": results["metadatas"][0][i],
-                    "distance": results["distances"][0][i],
-                })
+                out.append(
+                    {
+                        "id": doc_id,
+                        "text": results["documents"][0][i],
+                        "metadata": results["metadatas"][0][i],
+                        "distance": results["distances"][0][i],
+                    }
+                )
             return out
         except Exception as e:
             log.warning(f"RAG query failed | collection={collection} | {e}")
@@ -60,6 +70,7 @@ class RAGEngine:
 
     def ingest_knowledge_dir(self, collection: str, dir_path) -> int:
         from pathlib import Path
+
         dir_path = Path(dir_path)
         count = 0
         for fpath in dir_path.rglob("*"):
@@ -71,18 +82,22 @@ class RAGEngine:
             chunks = self._chunk_text(text, chunk_size=512, overlap=50)
             for i, chunk in enumerate(chunks):
                 doc_id = f"{fpath.stem}-chunk-{i}"
-                self.upsert(collection, doc_id, chunk, {"source": str(fpath), "chunk": i})
+                self.upsert(
+                    collection, doc_id, chunk, {"source": str(fpath), "chunk": i}
+                )
                 count += 1
         return count
 
     def _read_file(self, path) -> str:
         from pathlib import Path
+
         path = Path(path)
         if path.suffix in (".txt", ".md"):
             return path.read_text(encoding="utf-8", errors="ignore")
         elif path.suffix == ".pdf":
             try:
                 from pypdf import PdfReader
+
                 reader = PdfReader(str(path))
                 return " ".join(p.extract_text() or "" for p in reader.pages)
             except Exception:
@@ -90,6 +105,7 @@ class RAGEngine:
         elif path.suffix == ".docx":
             try:
                 from docx import Document
+
                 doc = Document(str(path))
                 return " ".join(p.text for p in doc.paragraphs)
             except Exception:
@@ -105,5 +121,6 @@ class RAGEngine:
             chunks.append(" ".join(words[start:end]))
             start += chunk_size - overlap
         return chunks
+
 
 rag_engine = RAGEngine(path="auto")

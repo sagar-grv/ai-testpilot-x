@@ -2,6 +2,7 @@
 core/explain_engine.py — Meta-prompt for AI explainability.
 Used on Pages 02, 03, 04, 05 via "Explain AI Decision" expanders.
 """
+
 from __future__ import annotations
 from monitoring.logger import get_logger
 
@@ -20,6 +21,7 @@ def explain_decision(decision_context: str) -> str:
     """Call Gemini to explain an agent decision in plain English."""
     try:
         from core.llm_client import LLMClient
+
         client = LLMClient(provider="gemini")
         prompt = _EXPLAIN_PROMPT.format(decision_context=decision_context)
         return client.generate(prompt)

@@ -1,4 +1,5 @@
 """Selenium Grid connector for remote execution."""
+
 from __future__ import annotations
 import httpx
 from monitoring.logger import get_logger
@@ -9,6 +10,7 @@ log = get_logger(__name__)
 def get_grid_driver(grid_url: str, headless: bool = True):
     """Connect to Selenium Grid hub, return Remote WebDriver."""
     from selenium import webdriver
+
     options = webdriver.ChromeOptions()
     if headless:
         options.add_argument("--headless")

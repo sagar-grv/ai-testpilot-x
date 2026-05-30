@@ -2,8 +2,8 @@
 Shared CSS design system for AI TestPilot X.
 Import this in every page: from pages._css import inject_css
 """
-import streamlit as st
 
+import streamlit as st
 
 DESIGN_CSS = """
 <style>
@@ -242,7 +242,8 @@ def inject_css():
 def sidebar_branding():
     """Inject sidebar logo/branding. Call once per page."""
     with st.sidebar:
-        st.markdown("""
+        st.markdown(
+            """
         <div style="padding: 4px 4px 16px 4px; text-align: center;">
             <div style="font-size: 32px; margin-bottom: 6px;">🧪</div>
             <div style="font-size: 16px; font-weight: 800; color: #6C63FF;
@@ -251,5 +252,7 @@ def sidebar_branding():
                 Autonomous QA Platform
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
         st.divider()

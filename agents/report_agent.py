@@ -1,4 +1,5 @@
 """ReportAgent — generates GO/GO_WITH_RISK/NO_GO release decision + executive summary."""
+
 from __future__ import annotations
 from datetime import datetime, timezone
 from agents.base_agent import BaseAgent
@@ -43,19 +44,30 @@ class ReportAgent(BaseAgent):
         decision = self._determine_decision(bugs)
 
         # LLM generates narrative + risk score only
-        cluster_summary = "; ".join(f"{c.root_cause_summary} ({c.count} bugs)" for c in clusters)
+        cluster_summary = "; ".join(
+            f"{c.root_cause_summary} ({c.count} bugs)" for c in clusters
+        )
         try:
             prompt_template = self._load_prompt("report_prompt.txt")
             prompt = prompt_template.format(
-                total_tests=total, passed=passed, failed=failed,
-                critical_bugs=critical, high_bugs=high, medium_bugs=medium, low_bugs=low,
+                total_tests=total,
+                passed=passed,
+                failed=failed,
+                critical_bugs=critical,
+                high_bugs=high,
+                medium_bugs=medium,
+                low_bugs=low,
                 cluster_summary=cluster_summary or "No bug clusters",
                 decision=decision,
             )
             raw = self._call_llm(prompt)
             data = self._parse_json(raw)
-            recommendation = str(data.get("recommendation_text", self._default_recommendation(decision)))
-            risk_score = float(data.get("risk_score", self._default_risk_score(decision)))
+            recommendation = str(
+                data.get("recommendation_text", self._default_recommendation(decision))
+            )
+            risk_score = float(
+                data.get("risk_score", self._default_risk_score(decision))
+            )
             confidence = float(data.get("confidence_score", 0.8))
         except Exception as e:
             self.log.warning(f"ReportAgent LLM failed, using defaults: {e}")
@@ -84,14 +96,17 @@ class ReportAgent(BaseAgent):
             from storage.db import get_session
             from storage.models.reports import ReportRecord
             import json
+
             db = get_session()
-            db.add(ReportRecord(
-                session_id=session_id,
-                decision=decision,
-                summary=recommendation,
-                report_json=json.dumps(report.model_dump()),
-                created_at=datetime.now(timezone.utc),
-            ))
+            db.add(
+                ReportRecord(
+                    session_id=session_id,
+                    decision=decision,
+                    summary=recommendation,
+                    report_json=json.dumps(report.model_dump()),
+                    created_at=datetime.now(timezone.utc),
+                )
+            )
             db.commit()
             db.close()
         except Exception as e:
@@ -100,12 +115,19 @@ class ReportAgent(BaseAgent):
         # Index in RAG
         try:
             from core.rag_engine import rag_engine
-            rag_engine.upsert("reports", f"report-{session_id}",
-                              f"{decision} {recommendation}", {"session_id": session_id, "decision": decision})
+
+            rag_engine.upsert(
+                "reports",
+                f"report-{session_id}",
+                f"{decision} {recommendation}",
+                {"session_id": session_id, "decision": decision},
+            )
         except Exception as e:
             self.log.warning(f"ReportAgent RAG upsert failed: {e}")
 
-        bus.emit(EventType.REPORT_GENERATED, {"decision": decision, "session_id": session_id})
+        bus.emit(
+            EventType.REPORT_GENERATED, {"decision": decision, "session_id": session_id}
+        )
         self.log.info(f"ReportAgent complete | decision={decision}")
         return report
 

@@ -1,4 +1,5 @@
 """BugAgent — analyzes test failures, correlates with RAG, clusters by root cause."""
+
 from __future__ import annotations
 import re
 from datetime import datetime, timezone
@@ -31,7 +32,9 @@ class BugAgent(BaseAgent):
         super().__init__()
         self.memory = BugMemory()
 
-    def analyze_single(self, error_message: str, session_id: str, index: int = 0) -> BugSchema:
+    def analyze_single(
+        self, error_message: str, session_id: str, index: int = 0
+    ) -> BugSchema:
         """Analyze one failure. Returns BugSchema."""
         self.log.info(f"BugAgent.analyze_single | session={session_id} | index={index}")
         signature = _extract_failure_signature(error_message)
@@ -69,8 +72,16 @@ class BugAgent(BaseAgent):
         bug = BugSchema(
             id=bug_id,
             title=str(data.get("title", f"Failure {index}")),
-            severity=data.get("severity", "Medium") if data.get("severity") in ["Critical", "High", "Medium", "Low"] else "Medium",
-            priority=data.get("priority", "P3") if data.get("priority") in ["P1", "P2", "P3", "P4"] else "P3",
+            severity=(
+                data.get("severity", "Medium")
+                if data.get("severity") in ["Critical", "High", "Medium", "Low"]
+                else "Medium"
+            ),
+            priority=(
+                data.get("priority", "P3")
+                if data.get("priority") in ["P1", "P2", "P3", "P4"]
+                else "P3"
+            ),
             failure_signature=str(data.get("failure_signature", signature)),
             root_cause=str(data.get("root_cause", "")),
             root_cause_confidence=float(data.get("root_cause_confidence", 0.5)),
@@ -81,28 +92,37 @@ class BugAgent(BaseAgent):
         )
 
         # Store in RAG for future correlation
-        self.memory.store_bug(session_id, bug.id, bug.title, bug.root_cause,
-                              bug.failure_signature, bug.severity)
+        self.memory.store_bug(
+            session_id,
+            bug.id,
+            bug.title,
+            bug.root_cause,
+            bug.failure_signature,
+            bug.severity,
+        )
 
         # Persist to SQLite
         try:
             from storage.db import get_session
             from storage.models.bugs import BugRecord
+
             db = get_session()
-            db.add(BugRecord(
-                session_id=session_id,
-                bug_id=bug.id,
-                title=bug.title,
-                severity=bug.severity,
-                priority=bug.priority,
-                failure_signature=bug.failure_signature,
-                root_cause=bug.root_cause,
-                root_cause_confidence=bug.root_cause_confidence,
-                fix_suggestion=bug.fix_suggestion,
-                fix_confidence=bug.fix_confidence,
-                severity_confidence=bug.severity_confidence,
-                created_at=datetime.now(timezone.utc),
-            ))
+            db.add(
+                BugRecord(
+                    session_id=session_id,
+                    bug_id=bug.id,
+                    title=bug.title,
+                    severity=bug.severity,
+                    priority=bug.priority,
+                    failure_signature=bug.failure_signature,
+                    root_cause=bug.root_cause,
+                    root_cause_confidence=bug.root_cause_confidence,
+                    fix_suggestion=bug.fix_suggestion,
+                    fix_confidence=bug.fix_confidence,
+                    severity_confidence=bug.severity_confidence,
+                    created_at=datetime.now(timezone.utc),
+                )
+            )
             db.commit()
             db.close()
         except Exception as e:
@@ -114,30 +134,42 @@ class BugAgent(BaseAgent):
         """Group bugs by first keyword of root_cause."""
         clusters: dict[str, list[BugSchema]] = {}
         for bug in bugs:
-            key = bug.root_cause.split()[0].lower() if bug.root_cause.split() else "unknown"
+            key = (
+                bug.root_cause.split()[0].lower()
+                if bug.root_cause.split()
+                else "unknown"
+            )
             clusters.setdefault(key, []).append(bug)
 
         result = []
         for idx, (key, group) in enumerate(clusters.items()):
             severities = [b.severity for b in group]
             top_severity = next((s for s in _SEVERITY_ORDER if s in severities), "Low")
-            result.append(BugClusterSchema(
-                cluster_id=f"CLUSTER-{idx:03d}",
-                root_cause_summary=f"{key.capitalize()} related failure",
-                bug_ids=[b.id for b in group],
-                severity=top_severity,
-                count=len(group),
-            ))
+            result.append(
+                BugClusterSchema(
+                    cluster_id=f"CLUSTER-{idx:03d}",
+                    root_cause_summary=f"{key.capitalize()} related failure",
+                    bug_ids=[b.id for b in group],
+                    severity=top_severity,
+                    count=len(group),
+                )
+            )
         return result
 
-    def run(self, execution: ExecutionSchema, session_id: str) -> tuple[list[BugSchema], list[BugClusterSchema]]:
+    def run(
+        self, execution: ExecutionSchema, session_id: str
+    ) -> tuple[list[BugSchema], list[BugClusterSchema]]:
         """Analyze all failed tests. Returns (bugs, clusters)."""
         failed = [r for r in execution.results if r.status in ("FAIL", "ERROR")]
         self.log.info(f"BugAgent.run | failed_count={len(failed)}")
         bugs = []
         for idx, result in enumerate(failed):
-            bug = self.analyze_single(result.error_message or result.status, session_id, index=idx)
+            bug = self.analyze_single(
+                result.error_message or result.status, session_id, index=idx
+            )
             bugs.append(bug)
         clusters = self._cluster_bugs(bugs)
-        bus.emit(EventType.BUG_ANALYZED, {"count": len(bugs), "clusters": len(clusters)})
+        bus.emit(
+            EventType.BUG_ANALYZED, {"count": len(bugs), "clusters": len(clusters)}
+        )
         return bugs, clusters

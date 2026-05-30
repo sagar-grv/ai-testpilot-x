@@ -1,4 +1,5 @@
 """VerificationAgent — checks test case coverage, duplicates, missing edge cases."""
+
 from __future__ import annotations
 from agents.base_agent import BaseAgent
 from schemas.testcase_schema import TestCaseSchema
@@ -14,10 +15,17 @@ log = get_logger(__name__)
 class VerificationAgent(BaseAgent):
     agent_name = "VerificationAgent"
 
-    def run(self, test_cases: list[TestCaseSchema], retry_count: int = 0) -> VerificationSchema:
+    def run(
+        self, test_cases: list[TestCaseSchema], retry_count: int = 0
+    ) -> VerificationSchema:
         self.log.info(f"VerificationAgent.run | tc_count={len(test_cases)}")
         if not test_cases:
-            return VerificationSchema(coverage_score=0.0, duplicate_count=0, missing_edge_cases=["No test cases provided"], passed=False)
+            return VerificationSchema(
+                coverage_score=0.0,
+                duplicate_count=0,
+                missing_edge_cases=["No test cases provided"],
+                passed=False,
+            )
 
         # Try AI-based verification, fall back to heuristic
         try:
@@ -36,8 +44,13 @@ class VerificationAgent(BaseAgent):
         )
 
         # Retry loop: if not passed and within retry limit, could be triggered by caller
-        bus.emit(EventType.VERIFICATION_COMPLETE, {"passed": schema.passed, "coverage": schema.coverage_score})
-        self.log.info(f"VerificationAgent complete | passed={schema.passed} | coverage={schema.coverage_score:.2f}")
+        bus.emit(
+            EventType.VERIFICATION_COMPLETE,
+            {"passed": schema.passed, "coverage": schema.coverage_score},
+        )
+        self.log.info(
+            f"VerificationAgent complete | passed={schema.passed} | coverage={schema.coverage_score:.2f}"
+        )
         return schema
 
     def _ai_verify(self, test_cases: list[TestCaseSchema]) -> VerificationSchema:

@@ -1,29 +1,36 @@
 """Page 03 — Selenium Script Generator with HITL gate."""
+
 import streamlit as st
 from urllib.parse import urlparse
 from config import settings
 
-st.set_page_config(page_title="Selenium Generator | AI TestPilot X", page_icon="⚙️", layout="wide")
+st.set_page_config(
+    page_title="Selenium Generator | AI TestPilot X", page_icon="⚙️", layout="wide"
+)
 
 # ── Inject shared CSS + sidebar ───────────────────────────────────────────────
 from pages._css import inject_css, sidebar_branding
+
 inject_css()
 sidebar_branding()
 
 
-
-st.markdown("""
+st.markdown(
+    """
 <h1 class="tp-page-title">⚙️ Selenium Script Generator</h1>
 <p class="tp-page-subtitle">
     Generate Python Selenium scripts from test cases and execute with human-in-the-loop approval.
 </p>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 st.divider()
 
 # ── Empty state ───────────────────────────────────────────────────────────────
 test_cases = st.session_state.get("generated_testcases", [])
 if not test_cases:
-    st.markdown("""
+    st.markdown(
+        """
     <div style="background:#0F1117; border:1px dashed #1E2337; border-radius:14px;
                 padding:56px 32px; text-align:center;">
         <div style="font-size:52px; margin-bottom:14px;">⚠️</div>
@@ -33,7 +40,9 @@ if not test_cases:
             Go to <strong style="color:#6C63FF;">AI Test Generator</strong> first
             to generate test cases from a user story.
         </div>
-    </div>""", unsafe_allow_html=True)
+    </div>""",
+        unsafe_allow_html=True,
+    )
     st.stop()
 
 # ── Configuration ─────────────────────────────────────────────────────────────
@@ -43,21 +52,30 @@ cfg_c1, cfg_c2 = st.columns(2)
 with cfg_c1:
     tc_options = {tc.id: f"{tc.id} — {tc.title}" for tc in test_cases}
     selected_id = st.selectbox(
-        "Test Case", options=list(tc_options.keys()),
-        format_func=lambda x: tc_options[x]
+        "Test Case",
+        options=list(tc_options.keys()),
+        format_func=lambda x: tc_options[x],
     )
 with cfg_c2:
-    target_url = st.text_input("Target URL", value="https://www.saucedemo.com",
-                               placeholder="https://your-app.com")
+    target_url = st.text_input(
+        "Target URL",
+        value="https://www.saucedemo.com",
+        placeholder="https://your-app.com",
+    )
 
 fw_col, mode_col = st.columns(2)
 with fw_col:
-    st.radio("Framework", ["Selenium (Python)", "Playwright (coming soon)"],
-             horizontal=True, label_visibility="collapsed")
+    st.radio(
+        "Framework",
+        ["Selenium (Python)", "Playwright (coming soon)"],
+        horizontal=True,
+        label_visibility="collapsed",
+    )
 with mode_col:
     MODE_COLORS = {"LOCAL": "#22c55e", "MOCK": "#3b82f6", "GRID": "#a855f7"}
     mc = MODE_COLORS.get(settings.EXECUTION_MODE, "#64748B")
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div style="background:#0F1117; border:1px solid #1E2337; border-radius:8px;
                 padding:12px 16px; margin-top:4px; display:flex; align-items:center; gap:10px;">
         <span style="font-size:11px; color:#64748B; font-weight:700;
@@ -66,7 +84,9 @@ with mode_col:
                      border-radius:20px; padding:3px 12px; font-size:12px; font-weight:700;">
             {settings.EXECUTION_MODE}
         </span>
-    </div>""", unsafe_allow_html=True)
+    </div>""",
+        unsafe_allow_html=True,
+    )
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -78,13 +98,16 @@ if gen_btn:
     with st.spinner(f"Generating Selenium script for {selected_id}..."):
         try:
             from agents.selenium_agent import SeleniumAgent
+
             script = SeleniumAgent().generate_for_tc(selected_tc, target_url)
-            st.session_state.update({
-                "current_script": script,
-                "current_tc_id": selected_id,
-                "target_url": target_url,
-                "execution_approved": None,
-            })
+            st.session_state.update(
+                {
+                    "current_script": script,
+                    "current_tc_id": selected_id,
+                    "target_url": target_url,
+                    "execution_approved": None,
+                }
+            )
             st.rerun()
         except Exception as e:
             st.error(f"Generation failed: {e}")
@@ -92,11 +115,14 @@ if gen_btn:
 # ── Script display ────────────────────────────────────────────────────────────
 if "current_script" in st.session_state:
     st.divider()
-    st.markdown('<div class="tp-section-title">Generated Script</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="tp-section-title">Generated Script</div>', unsafe_allow_html=True
+    )
 
     # Window chrome
     tc_id = st.session_state.get("current_tc_id", "TC01")
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div style="background:#161B2C; border:1px solid #1E2337;
                 border-bottom:none; border-radius:10px 10px 0 0;
                 padding:10px 16px; display:flex; align-items:center; gap:8px;">
@@ -105,34 +131,51 @@ if "current_script" in st.session_state:
         <span style="width:11px;height:11px;background:#22c55e;border-radius:50%;display:inline-block;"></span>
         <span style="color:#475569; font-size:12px; margin-left:8px; font-family:monospace;">
             test_{tc_id}.py</span>
-    </div>""", unsafe_allow_html=True)
+    </div>""",
+        unsafe_allow_html=True,
+    )
 
     try:
         from streamlit_ace import st_ace
+
         edited_script = st_ace(
             value=st.session_state["current_script"],
-            language="python", theme="monokai", height=280,
-            key="script_ace", font_size=13, show_gutter=True,
-            show_print_margin=False, wrap=False,
+            language="python",
+            theme="monokai",
+            height=280,
+            key="script_ace",
+            font_size=13,
+            show_gutter=True,
+            show_print_margin=False,
+            wrap=False,
         )
     except ImportError:
         edited_script = st.text_area(
-            "script", value=st.session_state["current_script"],
-            height=280, label_visibility="collapsed", key="script_ta"
+            "script",
+            value=st.session_state["current_script"],
+            height=280,
+            label_visibility="collapsed",
+            key="script_ta",
         )
     st.session_state["edited_script"] = edited_script
 
     # ── HITL Gate ─────────────────────────────────────────────────────────────
     st.divider()
-    st.markdown('<div class="tp-section-title">Execution Gate</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="tp-section-title">Execution Gate</div>', unsafe_allow_html=True
+    )
 
     from agents.execution_agent import ExecutionAgent
+
     exec_agent = ExecutionAgent()
-    domain = urlparse(st.session_state.get("target_url", target_url)).netloc or target_url
+    domain = (
+        urlparse(st.session_state.get("target_url", target_url)).netloc or target_url
+    )
     is_trusted = exec_agent.check_trust_domain(domain)
 
     if is_trusted:
-        st.markdown(f"""
+        st.markdown(
+            f"""
         <div style="background:#052e16; border:1px solid #16a34a44;
                     border-radius:12px; padding:18px 22px;
                     display:flex; align-items:center; gap:14px; margin-bottom:16px;">
@@ -145,10 +188,13 @@ if "current_script" in st.session_state:
                     is in your trusted domains list — auto-approved.
                 </div>
             </div>
-        </div>""", unsafe_allow_html=True)
+        </div>""",
+            unsafe_allow_html=True,
+        )
         st.session_state["execution_approved"] = "auto"
     else:
-        st.markdown(f"""
+        st.markdown(
+            f"""
         <div style="background:#431407; border:1px solid #f9731644;
                     border-radius:12px; padding:18px 22px; margin-bottom:16px;">
             <div style="display:flex; align-items:center; gap:14px;">
@@ -162,7 +208,9 @@ if "current_script" in st.session_state:
                     </div>
                 </div>
             </div>
-        </div>""", unsafe_allow_html=True)
+        </div>""",
+            unsafe_allow_html=True,
+        )
 
         a1, a2, a3 = st.columns(3)
         if a1.button("▶ Approve Once", type="primary", use_container_width=True):
@@ -184,7 +232,9 @@ if "current_script" in st.session_state:
         run_btn = st.button("▶ Run Test Now", type="primary")
 
         if run_btn:
-            script_run = st.session_state.get("edited_script") or st.session_state.get("current_script", "")
+            script_run = st.session_state.get("edited_script") or st.session_state.get(
+                "current_script", ""
+            )
             with st.spinner(f"Executing test in {settings.EXECUTION_MODE} mode..."):
                 try:
                     result_schema = exec_agent.run(
@@ -198,7 +248,8 @@ if "current_script" in st.session_state:
 
                     if result:
                         if result.status == "PASS":
-                            st.markdown(f"""
+                            st.markdown(
+                                f"""
                             <div style="background:#052e16; border:1px solid #16a34a55;
                                         border-radius:14px; padding:24px 28px;
                                         display:flex; align-items:center; gap:18px; margin:16px 0;">
@@ -211,9 +262,12 @@ if "current_script" in st.session_state:
                                         &nbsp;·&nbsp; Mode: {settings.EXECUTION_MODE}
                                     </div>
                                 </div>
-                            </div>""", unsafe_allow_html=True)
+                            </div>""",
+                                unsafe_allow_html=True,
+                            )
                         else:
-                            st.markdown(f"""
+                            st.markdown(
+                                f"""
                             <div style="background:#450a0a; border:1px solid #ef444455;
                                         border-radius:14px; padding:24px 28px; margin:16px 0;">
                                 <div style="display:flex; align-items:flex-start; gap:16px;">
@@ -228,34 +282,56 @@ if "current_script" in st.session_state:
                                         </div>
                                     </div>
                                 </div>
-                            </div>""", unsafe_allow_html=True)
+                            </div>""",
+                                unsafe_allow_html=True,
+                            )
 
-                            if any(kw in (result.error_message or "") for kw in
-                                   ["NoSuchElement", "ElementNotFound", "NoSuch"]):
-                                st.markdown('<div class="tp-section-title">Self-Healing Agent</div>',
-                                            unsafe_allow_html=True)
-                                st.markdown("""
+                            if any(
+                                kw in (result.error_message or "")
+                                for kw in ["NoSuchElement", "ElementNotFound", "NoSuch"]
+                            ):
+                                st.markdown(
+                                    '<div class="tp-section-title">Self-Healing Agent</div>',
+                                    unsafe_allow_html=True,
+                                )
+                                st.markdown(
+                                    """
                                 <div class="tp-card-sm" style="margin-bottom:12px;">
                                     <div style="font-size:13px; color:#94A3B8;">
                                         🔧 Attempting automatic locator recovery using hierarchy:
                                         <code>id → name → data-testid → data-cy → css → xpath → AI</code>
                                     </div>
-                                </div>""", unsafe_allow_html=True)
+                                </div>""",
+                                    unsafe_allow_html=True,
+                                )
                                 with st.spinner("Trying locator hierarchy..."):
                                     try:
                                         from agents.healing_agent import HealingAgent
+
                                         healing = HealingAgent().attempt_healing(
-                                            result.error_message, target_url, tc_id=tc_id
+                                            result.error_message,
+                                            target_url,
+                                            tc_id=tc_id,
                                         )
                                         st.session_state["healing_result"] = healing
                                         if healing.get("success"):
-                                            st.success(f"🔧 Recovered: `{healing['recovered_selector']}`")
+                                            st.success(
+                                                f"🔧 Recovered: `{healing['recovered_selector']}`"
+                                            )
                                         else:
-                                            st.warning("Auto-recovery failed. Manual fix required.")
-                                        with st.expander("View healing attempt details"):
+                                            st.warning(
+                                                "Auto-recovery failed. Manual fix required."
+                                            )
+                                        with st.expander(
+                                            "View healing attempt details"
+                                        ):
                                             tried = healing.get("tried_locators", [])
                                             for attempt in tried:
-                                                icon3 = "✅" if attempt.get("suggestion") else "❌"
+                                                icon3 = (
+                                                    "✅"
+                                                    if attempt.get("suggestion")
+                                                    else "❌"
+                                                )
                                                 st.markdown(
                                                     f"{icon3} **{attempt['type']}**: "
                                                     f"`{attempt.get('suggestion') or 'no suggestion'}`"

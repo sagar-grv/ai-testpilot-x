@@ -1,4 +1,5 @@
 """TestCaseAgent — generates test cases from RequirementSchema using RAG context."""
+
 from __future__ import annotations
 from agents.base_agent import BaseAgent
 from schemas.requirement_schema import RequirementSchema
@@ -9,7 +10,14 @@ from config import settings
 from monitoring.logger import get_logger
 
 log = get_logger(__name__)
-_VALID_TYPES = {"Positive", "Negative", "Security", "Performance", "Boundary", "Accessibility"}
+_VALID_TYPES = {
+    "Positive",
+    "Negative",
+    "Security",
+    "Performance",
+    "Boundary",
+    "Accessibility",
+}
 _VALID_PRIORITIES = {"Low", "Medium", "High", "Critical"}
 
 
@@ -46,8 +54,16 @@ class TestCaseAgent(BaseAgent):
                     id=f"TC{idx:02d}",
                     title=item.get("title", f"Test {idx}"),
                     module=module,
-                    type=item.get("type", "Positive") if item.get("type") in _VALID_TYPES else "Positive",
-                    priority=item.get("priority", "Medium") if item.get("priority") in _VALID_PRIORITIES else "Medium",
+                    type=(
+                        item.get("type", "Positive")
+                        if item.get("type") in _VALID_TYPES
+                        else "Positive"
+                    ),
+                    priority=(
+                        item.get("priority", "Medium")
+                        if item.get("priority") in _VALID_PRIORITIES
+                        else "Medium"
+                    ),
                     steps=item.get("steps", []),
                     expected_result=item.get("expected_result", ""),
                     confidence_score=float(item.get("confidence_score", 0.7)),

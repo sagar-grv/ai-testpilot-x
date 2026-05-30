@@ -618,3 +618,80 @@ PROMPTS_DIR resolved to: MultiplexedPath('C:\Users\sagar\Desktop\AI TestPilot X\
 2026-05-31T00:56:49.909339+0530 | INFO | core.rag_engine:22 — RAGEngine initialized | collections=['testcases', 'bugs', 'requirements', 'reports']
 2026-05-31T00:56:49.981422+0530 | DEBUG | core.rag_engine:30 — RAG upsert | collection=bugs | id=bugs-chunk-0
 2026-05-31T00:56:50.050484+0530 | DEBUG | core.rag_engine:30 — RAG upsert | collection=bugs | id=testcases-chunk-0
+2026-05-31T01:01:22.885399+0530 | INFO | core.rag_engine:26 — RAGEngine initialized | collections=['testcases', 'bugs', 'requirements', 'reports']
+2026-05-31T01:01:23.346112+0530 | DEBUG | agents.registry:15 — AgentRegistry: registered requirement -> RequirementAgent
+2026-05-31T01:01:23.346112+0530 | DEBUG | agents.registry:15 — AgentRegistry: registered testcase -> TestCaseAgent
+2026-05-31T01:01:23.346112+0530 | DEBUG | agents.registry:15 — AgentRegistry: registered verification -> VerificationAgent
+2026-05-31T01:01:23.346112+0530 | DEBUG | agents.registry:15 — AgentRegistry: registered selenium -> SeleniumAgent
+2026-05-31T01:01:23.346112+0530 | DEBUG | agents.registry:15 — AgentRegistry: registered api -> APIAgent
+2026-05-31T01:01:23.346112+0530 | DEBUG | agents.registry:15 — AgentRegistry: registered execution -> ExecutionAgent
+2026-05-31T01:01:23.346112+0530 | DEBUG | agents.registry:15 — AgentRegistry: registered bug -> BugAgent
+2026-05-31T01:01:23.346112+0530 | DEBUG | agents.registry:15 — AgentRegistry: registered healing -> HealingAgent
+2026-05-31T01:01:23.346112+0530 | DEBUG | agents.registry:15 — AgentRegistry: registered report -> ReportAgent
+2026-05-31T01:01:24.041283+0530 | INFO | agents.requirement_agent:16 — RequirementAgent.run | story_len=43
+2026-05-31T01:01:24.041283+0530 | DEBUG | core.event_bus:43 — EventBus emit | REQUIREMENT_ANALYZED
+2026-05-31T01:01:24.041283+0530 | INFO | agents.requirement_agent:32 — RequirementAgent complete | modules=['Login', 'Cart']
+2026-05-31T01:01:24.041283+0530 | INFO | agents.requirement_agent:16 — RequirementAgent.run | story_len=10
+2026-05-31T01:01:24.041283+0530 | DEBUG | core.event_bus:43 — EventBus emit | REQUIREMENT_ANALYZED
+2026-05-31T01:01:24.041283+0530 | INFO | agents.requirement_agent:32 — RequirementAgent complete | modules=['Login']
+2026-05-31T01:01:24.041283+0530 | INFO | agents.testcase_agent:28 — TestCaseAgent.run | modules=['Login']
+2026-05-31T01:01:24.084786+0530 | DEBUG | core.event_bus:43 — EventBus emit | TESTCASES_GENERATED
+2026-05-31T01:01:24.084786+0530 | INFO | agents.testcase_agent:75 — TestCaseAgent complete | count=1
+2026-05-31T01:01:24.084786+0530 | INFO | agents.testcase_agent:28 — TestCaseAgent.run | modules=['Login']
+2026-05-31T01:01:24.103923+0530 | DEBUG | core.event_bus:43 — EventBus emit | TESTCASES_GENERATED
+2026-05-31T01:01:24.103923+0530 | INFO | agents.testcase_agent:75 — TestCaseAgent complete | count=2
+2026-05-31T01:01:24.103923+0530 | INFO | agents.verification_agent:21 — VerificationAgent.run | tc_count=4
+2026-05-31T01:01:24.103923+0530 | DEBUG | core.event_bus:43 — EventBus emit | VERIFICATION_COMPLETE
+2026-05-31T01:01:24.103923+0530 | INFO | agents.verification_agent:51 — VerificationAgent complete | passed=True | coverage=0.95
+2026-05-31T01:01:24.103923+0530 | INFO | agents.verification_agent:21 — VerificationAgent.run | tc_count=1
+2026-05-31T01:01:24.103923+0530 | DEBUG | core.event_bus:43 — EventBus emit | VERIFICATION_COMPLETE
+2026-05-31T01:01:24.103923+0530 | INFO | agents.verification_agent:51 — VerificationAgent complete | passed=False | coverage=0.25
+2026-05-31T01:01:24.103923+0530 | INFO | agents.selenium_agent:20 — SeleniumAgent.generate_for_tc | tc_id=TC01
+2026-05-31T01:01:24.114161+0530 | INFO | agents.selenium_agent:20 — SeleniumAgent.generate_for_tc | tc_id=TC01
+2026-05-31T01:01:24.117324+0530 | INFO | agents.selenium_agent:20 — SeleniumAgent.generate_for_tc | tc_id=TC01
+2026-05-31T01:01:24.117324+0530 | INFO | agents.selenium_agent:20 — SeleniumAgent.generate_for_tc | tc_id=TC02
+2026-05-31T01:01:24.117324+0530 | DEBUG | core.event_bus:43 — EventBus emit | EXECUTION_COMPLETE
+2026-05-31T01:01:24.199632+0530 | INFO | agents.execution_agent:55 — Trust domain added: testdomain.com
+2026-05-31T01:01:24.201640+0530 | INFO | agents.healing_agent:43 — HealingAgent.attempt_healing | original=#login-btn
+2026-05-31T01:01:24.201640+0530 | INFO | agents.healing_agent:77 — HealingAgent recovered via id: [data-testid='login-btn']
+2026-05-31T01:01:24.201640+0530 | DEBUG | core.event_bus:43 — EventBus emit | HEALING_COMPLETE
+2026-05-31T01:01:24.205670+0530 | INFO | agents.healing_agent:43 — HealingAgent.attempt_healing | original=NoSuchElement: #btn
+2026-05-31T01:01:24.207677+0530 | DEBUG | core.event_bus:43 — EventBus emit | HEALING_COMPLETE
+2026-05-31T01:01:24.207677+0530 | INFO | agents.api_agent:21 — APIAgent.run_for_module | module=Login
+2026-05-31T01:01:24.209685+0530 | INFO | agents.api_agent:49 — APIAgent complete | module=Login | count=1
+2026-05-31T01:01:24.209685+0530 | INFO | agents.api_agent:21 — APIAgent.run_for_module | module=Test
+2026-05-31T01:01:24.211694+0530 | INFO | agents.api_agent:49 — APIAgent complete | module=Test | count=1
+2026-05-31T01:01:24.220077+0530 | INFO | agents.api_agent:21 — APIAgent.run_for_module | module=Login
+2026-05-31T01:01:24.220077+0530 | INFO | agents.api_agent:49 — APIAgent complete | module=Login | count=1
+2026-05-31T01:01:24.220077+0530 | INFO | agents.api_agent:21 — APIAgent.run_for_module | module=Cart
+2026-05-31T01:01:24.220077+0530 | INFO | agents.api_agent:49 — APIAgent complete | module=Cart | count=1
+2026-05-31T01:01:24.220077+0530 | INFO | agents.bug_agent:39 — BugAgent.analyze_single | session=sess-001 | index=0
+2026-05-31T01:01:24.231245+0530 | INFO | agents.bug_agent:164 — BugAgent.run | failed_count=1
+2026-05-31T01:01:24.231245+0530 | INFO | agents.bug_agent:39 — BugAgent.analyze_single | session=sess-001 | index=0
+2026-05-31T01:01:24.231245+0530 | DEBUG | core.event_bus:43 — EventBus emit | BUG_ANALYZED
+2026-05-31T01:01:24.242769+0530 | INFO | agents.report_agent:33 — ReportAgent.run | session=test-session | bugs=0
+2026-05-31T01:01:24.244568+0530 | DEBUG | core.event_bus:43 — EventBus emit | REPORT_GENERATED
+2026-05-31T01:01:24.244568+0530 | INFO | agents.report_agent:131 — ReportAgent complete | decision=GO
+2026-05-31T01:01:24.247677+0530 | DEBUG | agents.registry:15 — AgentRegistry: registered requirement -> RequirementAgent
+2026-05-31T01:01:24.697757+0530 | INFO | orchestrator:240 — LangGraph orchestrator compiled successfully
+2026-05-31T01:01:24.722915+0530 | DEBUG | core.event_bus:43 — EventBus emit | AGENT_FAILED
+2026-05-31T01:01:24.780547+0530 | INFO | core.rag_engine:26 — RAGEngine initialized | collections=['testcases', 'bugs', 'requirements', 'reports']
+2026-05-31T01:01:24.794387+0530 | DEBUG | core.screenshot_utils:11 — Screenshot saved: C:\Users\sagar\AppData\Local\Temp\pytesttemp\test_screenshot_utils_capture0\test.png
+2026-05-31T01:01:24.797565+0530 | WARNING | core.screenshot_utils:31 — compare_screenshots failed: [Errno 2] No such file or directory: 'nonexistent1.png'
+2026-05-31T01:01:24.843392+0530 | INFO | execution.runners.selenium_runner:62 — Test TC01 PASSED in 1ms
+2026-05-31T01:01:24.847335+0530 | DEBUG | core.screenshot_utils:11 — Screenshot saved: execution\artifacts\screenshots\TC01_failure.png
+2026-05-31T01:01:24.847335+0530 | ERROR | execution.runners.selenium_runner:76 — Test TC01 FAILED: Element not found
+2026-05-31T01:01:24.859376+0530 | WARNING | execution.grids.selenium_grid:30 — Grid health check failed: Connection refused
+2026-05-31T01:01:24.864493+0530 | DEBUG | core.llm_client:44 — LLMClient.generate | provider=gemini | attempt=1
+2026-05-31T01:01:24.869464+0530 | DEBUG | core.llm_client:44 — LLMClient.generate | provider=gemini | attempt=1
+2026-05-31T01:01:24.869464+0530 | WARNING | core.llm_client:50 — LLM generate failed | attempt=1/2 | API error
+2026-05-31T01:01:25.870882+0530 | DEBUG | core.llm_client:44 — LLMClient.generate | provider=gemini | attempt=2
+2026-05-31T01:01:25.870882+0530 | WARNING | core.llm_client:50 — LLM generate failed | attempt=2/2 | API error
+2026-05-31T01:01:25.901153+0530 | INFO | core.rag_engine:26 — RAGEngine initialized | collections=['testcases', 'bugs', 'requirements', 'reports']
+2026-05-31T01:01:25.933245+0530 | INFO | core.rag_engine:26 — RAGEngine initialized | collections=['testcases', 'bugs', 'requirements', 'reports']
+2026-05-31T01:01:25.956609+0530 | DEBUG | core.rag_engine:36 — RAG upsert | collection=testcases | id=tc-001
+2026-05-31T01:01:26.004034+0530 | INFO | core.rag_engine:26 — RAGEngine initialized | collections=['testcases', 'bugs', 'requirements', 'reports']
+2026-05-31T01:01:26.068226+0530 | DEBUG | core.rag_engine:36 — RAG upsert | collection=requirements | id=doc-chunk-0
+2026-05-31T01:01:26.100537+0530 | INFO | core.rag_engine:26 — RAGEngine initialized | collections=['testcases', 'bugs', 'requirements', 'reports']
+2026-05-31T01:01:26.148113+0530 | DEBUG | core.rag_engine:36 — RAG upsert | collection=bugs | id=bugs-chunk-0
+2026-05-31T01:01:26.199491+0530 | DEBUG | core.rag_engine:36 — RAG upsert | collection=bugs | id=testcases-chunk-0

@@ -1,6 +1,8 @@
 """Cross-agent context passing — stores requirement and test context for current session."""
+
 from __future__ import annotations
 from typing import Any
+
 
 class ConversationMemory:
     def __init__(self):
@@ -17,5 +19,6 @@ class ConversationMemory:
 
     def as_dict(self) -> dict:
         return dict(self._context)
+
 
 conversation_memory = ConversationMemory()

@@ -1,4 +1,5 @@
 """storage/db.py — SQLAlchemy engine factory."""
+
 from __future__ import annotations
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
@@ -19,6 +20,7 @@ def create_engine_and_tables(url: str | None = None):
     import storage.models.bugs  # noqa: F401
     import storage.models.reports  # noqa: F401
     import storage.models.trust_domains  # noqa: F401
+
     Base.metadata.create_all(engine)
     return engine
 

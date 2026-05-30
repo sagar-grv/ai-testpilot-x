@@ -5,6 +5,7 @@ Graph flow:
   START → requirement → testcase → verification → [selenium, api] → hitl_gate
   → execution → (bug_analysis | report) → (healing | report) → report → END
 """
+
 from __future__ import annotations
 from typing import Callable
 from langgraph.graph import StateGraph, END, START
@@ -15,6 +16,7 @@ from core.event_bus import bus, EventType
 
 log = get_logger(__name__)
 
+
 # ─── HITL approval function ───────────────────────────────────────────────────
 # Default: always approve (used in CLI / headless mode).
 # Override via build_graph(approval_fn=...) for UI-gated approval.
@@ -24,8 +26,10 @@ def _DEFAULT_APPROVAL_FN() -> bool:
 
 # ─── Node implementations ────────────────────────────────────────────────────
 
+
 def _run_requirement(state: GlobalState) -> dict:
     from agents.requirement_agent import RequirementAgent
+
     req_input = state.get("session_metadata", {}).get("user_story", "")
     if not req_input:
         return {}
@@ -37,6 +41,7 @@ def _run_requirement(state: GlobalState) -> dict:
 def _run_testcase(state: GlobalState) -> dict:
     from agents.testcase_agent import TestCaseAgent
     from schemas.requirement_schema import RequirementSchema
+
     req_data = state.get("requirement_context")
     if not req_data:
         return {}
@@ -49,6 +54,7 @@ def _run_testcase(state: GlobalState) -> dict:
 def _run_verification(state: GlobalState) -> dict:
     from agents.verification_agent import VerificationAgent
     from schemas.testcase_schema import TestCaseSchema
+
     tc_data = state.get("generated_testcases") or []
     if not tc_data:
         return {}
@@ -61,6 +67,7 @@ def _run_verification(state: GlobalState) -> dict:
 def _run_selenium(state: GlobalState) -> dict:
     from agents.selenium_agent import SeleniumAgent
     from schemas.testcase_schema import TestCaseSchema
+
     tc_data = state.get("generated_testcases") or []
     target_url = state.get("session_metadata", {}).get("target_url", "")
     if not tc_data:
@@ -74,13 +81,16 @@ def _run_selenium(state: GlobalState) -> dict:
 def _run_api(state: GlobalState) -> dict:
     from agents.api_agent import APIAgent
     from schemas.requirement_schema import RequirementSchema
+
     req_data = state.get("requirement_context")
     if not req_data:
         return {}
     req = RequirementSchema(**req_data)
     agent = APIAgent()
     suite = agent.run(req)
-    return {"api_test_suite": {k: [t.model_dump() for t in v] for k, v in suite.items()}}
+    return {
+        "api_test_suite": {k: [t.model_dump() for t in v] for k, v in suite.items()}
+    }
 
 
 def _run_hitl_gate(state: GlobalState) -> dict:
@@ -99,6 +109,7 @@ def _run_hitl_gate(state: GlobalState) -> dict:
 def _run_execution(state: GlobalState) -> dict:
     from agents.execution_agent import ExecutionAgent
     from config import settings
+
     scripts = state.get("selenium_scripts") or {}
     target_url = state.get("session_metadata", {}).get("target_url", "")
     approved = state.get("_hitl_approved", True)
@@ -106,8 +117,12 @@ def _run_execution(state: GlobalState) -> dict:
         log.warning("ExecutionAgent: no scripts to run")
         return {}
     agent = ExecutionAgent()
-    result = agent.run(mode=settings.EXECUTION_MODE, scripts=scripts,
-                       target_url=target_url, approved=approved)
+    result = agent.run(
+        mode=settings.EXECUTION_MODE,
+        scripts=scripts,
+        target_url=target_url,
+        approved=approved,
+    )
     return {"execution_results": result.model_dump()}
 
 
@@ -121,6 +136,7 @@ def _should_analyze_bugs(state: GlobalState) -> str:
 def _run_bug_analysis(state: GlobalState) -> dict:
     from agents.bug_agent import BugAgent
     from schemas.execution_schema import ExecutionSchema
+
     exec_data = state.get("execution_results")
     if not exec_data:
         return {}
@@ -144,6 +160,7 @@ def _should_heal(state: GlobalState) -> str:
 def _run_healing(state: GlobalState) -> dict:
     from agents.healing_agent import HealingAgent
     from schemas.bug_schema import BugSchema
+
     bugs_data = state.get("bugs") or []
     healing_results = {}
     agent = HealingAgent()
@@ -159,6 +176,7 @@ def _run_report(state: GlobalState) -> dict:
     from agents.report_agent import ReportAgent
     from schemas.execution_schema import ExecutionSchema
     from schemas.bug_schema import BugSchema, BugClusterSchema
+
     session_id = state.get("session_id", "unknown")
     exec_data = state.get("execution_results")
     execution = ExecutionSchema(**exec_data) if exec_data else None
@@ -172,6 +190,7 @@ def _run_report(state: GlobalState) -> dict:
 
 
 # ─── Graph builder ────────────────────────────────────────────────────────────
+
 
 def build_graph(approval_fn: Callable[[], bool] | None = None):
     """Build and compile the LangGraph state machine.
@@ -205,8 +224,14 @@ def build_graph(approval_fn: Callable[[], bool] | None = None):
     builder.add_edge("selenium", "hitl_gate")
     builder.add_edge("api", "hitl_gate")
     builder.add_edge("hitl_gate", "execution")
-    builder.add_conditional_edges("execution", _should_analyze_bugs, {"bug_analysis": "bug_analysis", "report": "reporting"})
-    builder.add_conditional_edges("bug_analysis", _should_heal, {"healing": "healing", "report": "reporting"})
+    builder.add_conditional_edges(
+        "execution",
+        _should_analyze_bugs,
+        {"bug_analysis": "bug_analysis", "report": "reporting"},
+    )
+    builder.add_conditional_edges(
+        "bug_analysis", _should_heal, {"healing": "healing", "report": "reporting"}
+    )
     builder.add_edge("healing", "reporting")
     builder.add_edge("reporting", END)
 

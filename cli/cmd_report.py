@@ -1,4 +1,5 @@
 """testpilot report — Generate a GO/NO GO release decision from test results."""
+
 from __future__ import annotations
 import json
 from pathlib import Path
@@ -11,20 +12,22 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 
 console = Console()
 
-EXIT_GO           = 0
+EXIT_GO = 0
 EXIT_GO_WITH_RISK = 1
-EXIT_NO_GO        = 2
+EXIT_NO_GO = 2
 
 
 def report_cmd(
-    results: Path = typer.Argument(...,
-        help="Path to execution results JSON (ExecutionSchema format)."),
-    output: Optional[Path] = typer.Option(None, "--output", "-o",
-        help="Save release report JSON to this file."),
-    config: Optional[Path] = typer.Option(None, "--config", "-c",
-        help="Path to testpilot.yaml."),
-    session: Optional[str] = typer.Option(None, "--session",
-        help="Session ID."),
+    results: Path = typer.Argument(
+        ..., help="Path to execution results JSON (ExecutionSchema format)."
+    ),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Save release report JSON to this file."
+    ),
+    config: Optional[Path] = typer.Option(
+        None, "--config", "-c", help="Path to testpilot.yaml."
+    ),
+    session: Optional[str] = typer.Option(None, "--session", help="Session ID."),
 ):
     """Generate a GO/NO GO release decision from existing test results.
 
@@ -41,6 +44,7 @@ def report_cmd(
     """
     try:
         from config import load_yaml_config, reload_settings
+
         load_yaml_config(config)
         reload_settings()
     except Exception:
@@ -57,10 +61,12 @@ def report_cmd(
         raise typer.Exit(1)
 
     console.print()
-    console.print(Panel.fit(
-        "[bold cyan]AI TestPilot X[/bold cyan]  ·  Release Report",
-        border_style="cyan"
-    ))
+    console.print(
+        Panel.fit(
+            "[bold cyan]AI TestPilot X[/bold cyan]  ·  Release Report",
+            border_style="cyan",
+        )
+    )
     console.print()
 
     sid = session or "cli-report"
@@ -86,32 +92,43 @@ def report_cmd(
 
         prog.update(t, description="Generating release decision...")
         from agents.report_agent import ReportAgent
+
         report = ReportAgent().run(exec_schema, bugs, clusters, session_id=sid)
 
-    decision   = report.decision
+    decision = report.decision
     risk_score = report.risk_score
 
     BANNERS = {
         "GO": ("green", "✅", "GO", "Release approved."),
-        "GO_WITH_RISK": ("yellow", "⚠️ ", "GO WITH RISK", "High severity issues. Proceed with caution."),
+        "GO_WITH_RISK": (
+            "yellow",
+            "⚠️ ",
+            "GO WITH RISK",
+            "High severity issues. Proceed with caution.",
+        ),
         "NO_GO": ("red", "🚫", "NO GO", "Critical bugs detected. Release blocked."),
     }
     color, icon, label, subtitle = BANNERS.get(decision, BANNERS["NO_GO"])
 
-    console.print(Panel(
-        f"{icon}  [bold {color}]{label}[/bold {color}]\n\n"
-        f"[dim]Risk Score[/dim]   [bold]{risk_score:.0f} / 100[/bold]\n"
-        f"[dim]Tests[/dim]        [green]{report.passed}[/green] / {report.total_tests} passed\n"
-        f"[dim]Bugs[/dim]         "
-        f"[red]{report.critical_bugs} critical[/red]  "
-        f"[yellow]{report.high_bugs} high[/yellow]  "
-        f"[dim]{report.medium_bugs} medium  {report.low_bugs} low[/dim]\n\n"
-        + (f"[italic dim]{report.recommendation_text}[/italic dim]"
-           if report.recommendation_text else ""),
-        title="[bold]Release Decision[/bold]",
-        border_style=color,
-        expand=False,
-    ))
+    console.print(
+        Panel(
+            f"{icon}  [bold {color}]{label}[/bold {color}]\n\n"
+            f"[dim]Risk Score[/dim]   [bold]{risk_score:.0f} / 100[/bold]\n"
+            f"[dim]Tests[/dim]        [green]{report.passed}[/green] / {report.total_tests} passed\n"
+            f"[dim]Bugs[/dim]         "
+            f"[red]{report.critical_bugs} critical[/red]  "
+            f"[yellow]{report.high_bugs} high[/yellow]  "
+            f"[dim]{report.medium_bugs} medium  {report.low_bugs} low[/dim]\n\n"
+            + (
+                f"[italic dim]{report.recommendation_text}[/italic dim]"
+                if report.recommendation_text
+                else ""
+            ),
+            title="[bold]Release Decision[/bold]",
+            border_style=color,
+            expand=False,
+        )
+    )
 
     if output:
         output.write_text(json.dumps(report.model_dump(), indent=2), encoding="utf-8")

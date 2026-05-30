@@ -1,4 +1,5 @@
 """testpilot dashboard — Launch the Streamlit visual dashboard."""
+
 from __future__ import annotations
 import typer
 from rich.console import Console
@@ -8,8 +9,9 @@ console = Console()
 
 def dashboard_cmd(
     port: int = typer.Option(8501, "--port", "-p", help="Port to run on."),
-    no_browser: bool = typer.Option(False, "--no-browser",
-        help="Don't open browser automatically."),
+    no_browser: bool = typer.Option(
+        False, "--no-browser", help="Don't open browser automatically."
+    ),
 ):
     """Launch the AI TestPilot X visual dashboard.
 
@@ -17,6 +19,7 @@ def dashboard_cmd(
     """
     try:
         import importlib.util
+
         if importlib.util.find_spec("streamlit") is None:
             raise ImportError("streamlit not found")
     except ImportError:
@@ -51,9 +54,15 @@ def dashboard_cmd(
     console.print()
 
     cmd = [
-        sys.executable, "-m", "streamlit", "run", str(app_path),
-        "--server.port", str(port),
-        "--server.headless", "false",
+        sys.executable,
+        "-m",
+        "streamlit",
+        "run",
+        str(app_path),
+        "--server.port",
+        str(port),
+        "--server.headless",
+        "false",
     ]
     if no_browser:
         cmd += ["--server.headless", "true"]

@@ -1,4 +1,5 @@
 """monitoring/logger.py — Loguru-based structured logger with safe path handling."""
+
 import sys
 from pathlib import Path
 from loguru import logger as _logger
@@ -6,13 +7,16 @@ from loguru import logger as _logger
 # Remove default handler
 _logger.remove()
 
+
 # ── Determine log level ───────────────────────────────────────────────────────
 def _get_log_level() -> str:
     try:
         from config import settings
+
         return settings.LOG_LEVEL
     except Exception:
         return "WARNING"
+
 
 LOG_LEVEL = _get_log_level()
 
@@ -28,12 +32,17 @@ _logger.add(
     colorize=True,
 )
 
+
 # ── File handler (only if a writable directory exists) ────────────────────────
 def _setup_file_handler() -> None:
     """Set up a rotating file log. Tries .testpilot/logs/ first, then falls back."""
     candidates = [
         Path.cwd() / ".testpilot" / "logs" / "testpilot.log",
-        Path(__file__).parent.parent / "execution" / "artifacts" / "logs" / "testpilot.log",
+        Path(__file__).parent.parent
+        / "execution"
+        / "artifacts"
+        / "logs"
+        / "testpilot.log",
     ]
     for log_path in candidates:
         try:

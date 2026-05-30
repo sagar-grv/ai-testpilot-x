@@ -1,4 +1,5 @@
 """BaseAgent — shared interface for all AI TestPilot X agents."""
+
 from __future__ import annotations
 import json
 from abc import ABC
@@ -17,9 +18,9 @@ def _find_prompts_dir() -> Path:
     """Locate prompts/ directory — works both from source and installed package."""
     # Try relative to this file (works when running from source)
     candidates = [
-        Path(__file__).parent.parent / "prompts",   # source layout: agents/../prompts
-        Path(__file__).parent / "prompts",           # flat layout
-        Path.cwd() / "prompts",                      # cwd fallback
+        Path(__file__).parent.parent / "prompts",  # source layout: agents/../prompts
+        Path(__file__).parent / "prompts",  # flat layout
+        Path.cwd() / "prompts",  # cwd fallback
     ]
     for c in candidates:
         if c.exists() and c.is_dir():
@@ -28,6 +29,7 @@ def _find_prompts_dir() -> Path:
     # Try importlib.resources (installed package)
     try:
         import importlib.resources as pkg_resources
+
         ref = pkg_resources.files("prompts")
         # Convert to a real Path by traversing to a known file
         p = Path(str(ref))

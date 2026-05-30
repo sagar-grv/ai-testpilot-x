@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Literal
 from pydantic import BaseModel
 
+
 class APITestResultSchema(BaseModel):
     method: Literal["GET", "POST", "PUT", "DELETE", "PATCH"]
     endpoint: str

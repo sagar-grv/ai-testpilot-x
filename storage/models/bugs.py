@@ -4,6 +4,7 @@ from sqlalchemy import String, Float, DateTime, Text
 from sqlalchemy.orm import Mapped, mapped_column
 from storage.db import Base
 
+
 class BugRecord(Base):
     __tablename__ = "bugs"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -18,4 +19,6 @@ class BugRecord(Base):
     fix_suggestion: Mapped[str] = mapped_column(Text)
     fix_confidence: Mapped[float] = mapped_column(Float, default=0.0)
     severity_confidence: Mapped[float] = mapped_column(Float, default=0.0)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc)
+    )

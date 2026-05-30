@@ -4,6 +4,7 @@ from sqlalchemy import String, Float, DateTime, Text
 from sqlalchemy.orm import Mapped, mapped_column
 from storage.db import Base
 
+
 class RequirementRecord(Base):
     __tablename__ = "requirements"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -13,4 +14,6 @@ class RequirementRecord(Base):
     risk_areas: Mapped[str] = mapped_column(Text, default="[]")
     priority: Mapped[str] = mapped_column(String(16), nullable=False)
     confidence_score: Mapped[float] = mapped_column(Float, default=0.0)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc)
+    )

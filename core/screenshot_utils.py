@@ -1,4 +1,5 @@
 """Screenshot capture and comparison utilities."""
+
 from monitoring.logger import get_logger
 
 log = get_logger(__name__)
@@ -16,6 +17,7 @@ def compare_screenshots(before: str, after: str) -> float:
     try:
         from PIL import Image
         import numpy as np
+
         img_a = np.array(Image.open(before).convert("RGB"))
         img_b = np.array(Image.open(after).convert("RGB"))
         if img_a.shape != img_b.shape:

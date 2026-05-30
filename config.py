@@ -6,6 +6,7 @@ Priority order:
   3. Environment variables / .env file
   4. Hard-coded defaults
 """
+
 from __future__ import annotations
 import os
 from pathlib import Path
@@ -25,11 +26,15 @@ def load_yaml_config(path: str | Path | None = None) -> dict:
     """
     import yaml
 
-    candidates = [path] if path else [
-        Path.cwd() / "testpilot.yaml",
-        Path.cwd() / "testpilot.yml",
-        Path.cwd() / "testpilot.toml",
-    ]
+    candidates = (
+        [path]
+        if path
+        else [
+            Path.cwd() / "testpilot.yaml",
+            Path.cwd() / "testpilot.yml",
+            Path.cwd() / "testpilot.toml",
+        ]
+    )
     for candidate in candidates:
         if candidate and Path(candidate).exists():
             with open(candidate, encoding="utf-8") as f:
@@ -56,12 +61,22 @@ def load_streamlit_secrets() -> None:
     """
     try:
         import streamlit as st
+
         if hasattr(st, "secrets") and len(st.secrets) > 0:
             _keys = [
-                "GEMINI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY",
-                "LANGSMITH_API_KEY", "LANGSMITH_PROJECT", "LANGSMITH_TRACING",
-                "DB_URL", "CHROMA_PATH", "EXECUTION_MODE", "SELENIUM_GRID_URL",
-                "APP_ENV", "LOG_LEVEL", "MAX_AGENT_RETRIES",
+                "GEMINI_API_KEY",
+                "OPENAI_API_KEY",
+                "ANTHROPIC_API_KEY",
+                "LANGSMITH_API_KEY",
+                "LANGSMITH_PROJECT",
+                "LANGSMITH_TRACING",
+                "DB_URL",
+                "CHROMA_PATH",
+                "EXECUTION_MODE",
+                "SELENIUM_GRID_URL",
+                "APP_ENV",
+                "LOG_LEVEL",
+                "MAX_AGENT_RETRIES",
             ]
             for k in _keys:
                 if k in st.secrets and k not in os.environ:
