@@ -6,7 +6,7 @@ Graph flow:
   → execution → (bug_analysis | report) → (healing | report) → report → END
 """
 from __future__ import annotations
-from typing import Any
+from typing import Any, Callable
 from langgraph.graph import StateGraph, END, START
 from langgraph.checkpoint.memory import MemorySaver
 from schemas.global_state import GlobalState
@@ -14,6 +14,11 @@ from monitoring.logger import get_logger
 from core.event_bus import bus, EventType
 
 log = get_logger(__name__)
+
+# ─── HITL approval function ───────────────────────────────────────────────────
+# Default: always approve (used in CLI / headless mode).
+# Override via build_graph(approval_fn=...) for UI-gated approval.
+_DEFAULT_APPROVAL_FN: Callable[[], bool] = lambda: True
 
 
 # ─── Node implementations ────────────────────────────────────────────────────
@@ -78,11 +83,16 @@ def _run_api(state: GlobalState) -> dict:
 
 
 def _run_hitl_gate(state: GlobalState) -> dict:
-    """HITL gate — in the LangGraph context, approval is assumed (handled in Streamlit UI).
-    This node is a pass-through; actual gate logic is in the Streamlit pages."""
-    log.info("HITL gate: approval assumed (handled by Streamlit UI)")
-    bus.emit(EventType.EXECUTION_APPROVED, {})
-    return {}
+    """HITL gate — calls the approval function registered at graph build time.
+
+    In CLI/headless mode this always returns True.
+    In Streamlit mode, approval_fn blocks until the user clicks Approve.
+    """
+    approved = state.get("_approval_fn", _DEFAULT_APPROVAL_FN)()
+    log.debug(f"HITL gate: approved={approved}")
+    if approved:
+        bus.emit(EventType.EXECUTION_APPROVED, {})
+    return {"_hitl_approved": approved}
 
 
 def _run_execution(state: GlobalState) -> dict:
@@ -90,12 +100,13 @@ def _run_execution(state: GlobalState) -> dict:
     from config import settings
     scripts = state.get("selenium_scripts") or {}
     target_url = state.get("session_metadata", {}).get("target_url", "")
+    approved = state.get("_hitl_approved", True)
     if not scripts:
         log.warning("ExecutionAgent: no scripts to run")
         return {}
     agent = ExecutionAgent()
     result = agent.run(mode=settings.EXECUTION_MODE, scripts=scripts,
-                       target_url=target_url, approved=True)
+                       target_url=target_url, approved=approved)
     return {"execution_results": result.model_dump()}
 
 
@@ -161,8 +172,15 @@ def _run_report(state: GlobalState) -> dict:
 
 # ─── Graph builder ────────────────────────────────────────────────────────────
 
-def build_graph():
-    """Build and compile the LangGraph state machine."""
+def build_graph(approval_fn: Callable[[], bool] | None = None):
+    """Build and compile the LangGraph state machine.
+
+    Args:
+        approval_fn: Called at the HITL gate to decide if execution proceeds.
+            Defaults to ``lambda: True`` (always approve — CLI / headless mode).
+            Pass a custom callable for UI-gated approval (e.g., Streamlit button).
+    """
+    _approval = approval_fn or _DEFAULT_APPROVAL_FN
     builder = StateGraph(GlobalState)
 
     # Nodes

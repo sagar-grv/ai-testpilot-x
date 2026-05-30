@@ -1,5 +1,11 @@
 """AI TestPilot X — Main entry point."""
 import streamlit as st
+from config import load_streamlit_secrets, reload_settings
+
+# Pull Streamlit Cloud secrets into env before anything else loads settings
+load_streamlit_secrets()
+reload_settings()
+
 from monitoring.tracing import configure_tracing
 from storage.db import get_engine
 

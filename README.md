@@ -1,119 +1,271 @@
 # AI TestPilot X
 
-> Autonomous AI-Powered Quality Engineering Platform
+> Autonomous AI-Powered Quality Engineering Platform & CLI
 
 [![Live App](https://img.shields.io/badge/Live%20App-ai--testpilot--x.streamlit.app-FF4B4B?logo=streamlit&logoColor=white)](https://ai-testpilot-x.streamlit.app/)
+[![PyPI](https://img.shields.io/badge/PyPI-ai--testpilot--x-blue?logo=pypi)](https://pypi.org/project/ai-testpilot-x/)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://python.org)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.40+-red)](https://streamlit.io)
 [![LangGraph](https://img.shields.io/badge/LangGraph-0.3.x-green)](https://langchain-ai.github.io/langgraph/)
 [![Gemini](https://img.shields.io/badge/Gemini-2.5--Flash-yellow)](https://aistudio.google.com)
 [![Tests](https://img.shields.io/badge/Tests-72%20Passing-brightgreen)](https://github.com/sagar-grv/ai-testpilot-x)
 
-## Overview
-
-AI TestPilot X is an autonomous quality engineering platform that transforms a plain-English user story into a complete test suite, executes it, analyzes failures, and produces an executive report — all through a stateful 10-agent LangGraph pipeline with human-in-the-loop controls.
-
 **Live Demo:** https://ai-testpilot-x.streamlit.app/
+
+---
+
+## What Is It?
+
+AI TestPilot X turns a plain-English user story into a complete QA pipeline — automatically.
+
+```bash
+pip install ai-testpilot-x
+
+testpilot run --story "User can login and checkout a product"
+```
+
+```
+  Analyzing requirements...   ✓  3 modules · High priority
+  Generating test cases...    ✓  12 test cases
+  Verifying coverage...       ✓  87% coverage
+  Executing tests (MOCK)...   ✓  10 passed · 2 failed
+  Analyzing bugs...           ✓  2 bugs found
+  Generating report...        ✓
+
+  ┌─────────────────────────────────────────────┐
+  │  Release Decision:  ⚠ GO WITH RISK          │
+  │  Risk Score:        45 / 100                │
+  │  Tests:             10 / 12 passed          │
+  │  Bugs:              0 Critical · 2 High     │
+  └─────────────────────────────────────────────┘
+```
+
+---
+
+## Installation
+
+```bash
+# Core CLI (test generation, bug analysis, reports)
+pip install ai-testpilot-x
+
+# With visual Streamlit dashboard
+pip install ai-testpilot-x[ui]
+
+# With real Selenium browser execution
+pip install ai-testpilot-x[selenium]
+
+# Everything
+pip install ai-testpilot-x[all]
+```
+
+---
+
+## CLI Commands
+
+### `testpilot init` — Setup wizard
+
+Creates `testpilot.yaml` in your project with your API key, target URL, and execution mode.
+
+```bash
+testpilot init
+```
+
+### `testpilot run` — Full pipeline
+
+Runs the complete 10-agent pipeline: analyze → generate → execute → report.
+
+```bash
+testpilot run --story "User can login and checkout"
+testpilot run --story "User can reset password" --url https://myapp.com --mode MOCK
+testpilot run --story "Admin manages users" --output report.json
+```
+
+**Exit codes:**
+- `0` = GO — all tests pass
+- `1` = GO WITH RISK — high severity bugs
+- `2` = NO GO — critical bugs, release blocked
+
+### `testpilot analyze` — Test cases only
+
+Generate test cases from a user story without executing them.
+
+```bash
+testpilot analyze --story "User can filter search results"
+testpilot analyze --story "Payment flow" --output test_cases.json
+```
+
+### `testpilot bugs` — Bug analysis
+
+Analyze any stack trace or error log with AI + RAG correlation.
+
+```bash
+testpilot bugs --log "NoSuchElementException: Unable to locate element: #login-btn"
+testpilot bugs --log ./test-output.log
+cat error.log | testpilot bugs --log -
+```
+
+### `testpilot report` — Release decision
+
+Generate a GO/NO GO decision from existing execution results.
+
+```bash
+testpilot report results.json
+testpilot report results.json --output release_report.json
+```
+
+### `testpilot dashboard` — Visual UI
+
+Launch the full Streamlit dashboard (requires `pip install ai-testpilot-x[ui]`).
+
+```bash
+testpilot dashboard
+testpilot dashboard --port 8080
+```
+
+---
+
+## CI/CD Integration
+
+Add AI TestPilot X as a quality gate to any CI pipeline. It exits with code `0` (pass) or `1`/`2` (fail), just like pytest or eslint.
+
+### GitHub Actions
+
+```yaml
+# .github/workflows/ai-quality-gate.yml
+name: AI Quality Gate
+on: [push, pull_request]
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: pip install ai-testpilot-x
+      - run: testpilot run --story "User can login and checkout"
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+```
+
+### GitLab CI
+
+```yaml
+ai-quality-gate:
+  stage: test
+  script:
+    - pip install ai-testpilot-x
+    - testpilot run --story "User can login" --mode MOCK
+  variables:
+    GEMINI_API_KEY: $GEMINI_API_KEY
+```
+
+---
+
+## Configuration (`testpilot.yaml`)
+
+Place in your project root. Run `testpilot init` to generate automatically.
+
+```yaml
+gemini_api_key: ${GEMINI_API_KEY}   # reads from env var
+execution_mode: MOCK                 # MOCK | LOCAL | GRID
+target_url: https://your-app.com
+
+db_url: sqlite:///.testpilot/testpilot.db
+chroma_path: .testpilot/chroma_db
+output_dir: .testpilot/reports
+log_level: WARNING
+```
+
+---
+
+## Python API
+
+```python
+from config import configure
+configure(gemini_api_key="AIzaSy...", execution_mode="MOCK")
+
+from api import run_pipeline, analyze, analyze_bug
+
+# Full pipeline
+result = run_pipeline("User can login and checkout", target_url="https://myapp.com")
+print(result["report"]["decision"])  # "GO" | "GO_WITH_RISK" | "NO_GO"
+
+# Test cases only
+test_cases = analyze("User can reset their password")
+for tc in test_cases:
+    print(tc.id, tc.title, tc.type, tc.priority)
+
+# Bug analysis
+bug = analyze_bug("NoSuchElementException: #login-btn at LoginPage.py:42")
+print(bug.severity, bug.root_cause, bug.fix_suggestion)
+```
+
+---
 
 ## Architecture
 
 ```
-Frontend (Streamlit — 8 pages)
-           ↓
+testpilot run --story "..."
+       ↓
    LangGraph Orchestrator
    GlobalState + Checkpointing
-           ↓
-┌──────────┼──────────┐
-│          │          │
-▼          ▼          ▼
-Test     Selenium   API
-Agents   Agent      Agent
-│          │          │
-▼          ▼          ▼
-ChromaDB  Selenium  httpx
-RAG       Grid/Local Runner
-           ↓
-    SQLite Storage
-           ↓
-  Executive Dashboard
+       ↓
+┌──────────────┬──────────────┐
+│              │              │
+▼              ▼              ▼
+Requirements  Selenium     API Tests
+Agent         Agent         Agent
+│              │              │
+▼              ▼              ▼
+Test Cases   Execution     Bug Agent
++ Coverage   (HITL Gate)   + Healing
+                │
+                ▼
+          Report Agent
+          GO / GO_WITH_RISK / NO_GO
 ```
+
+### 10 AI Agents
+
+| Agent | What it does |
+|---|---|
+| RequirementAgent | Parses user story → modules, risk areas, priority |
+| TestCaseAgent | Generates structured test cases with RAG context |
+| VerificationAgent | Coverage check, duplicate detection, edge case gaps |
+| SeleniumAgent | Generates Python Selenium code per test case |
+| APIAgent | Generates HTTP test suites with assertions |
+| ExecutionAgent | HITL gate, trust domains, LOCAL/MOCK/GRID modes |
+| BugAgent | Root cause analysis, RAG correlation, clustering |
+| HealingAgent | Self-healing locators (ID → Name → data-* → CSS → XPath → AI) |
+| ReportAgent | GO / GO_WITH_RISK / NO_GO decision engine |
+
+---
 
 ## Features
 
 | Feature | Status |
 |---|---|
-| Requirement Analysis Agent | ✅ |
 | AI Test Case Generation + Coverage Radar | ✅ |
-| Test Verification (coverage, edge cases) | ✅ |
 | Selenium Script Generation | ✅ |
 | API Test Generation + Live Execution | ✅ |
 | Human-in-the-Loop Execution Gate | ✅ |
-| Trust Domain Management | ✅ |
 | Bug Analysis with RAG Correlation | ✅ |
-| Bug Clustering by Root Cause | ✅ |
 | Self-Healing Locator Recovery | ✅ |
-| Executive Report (GO / GO_WITH_RISK / NO_GO) | ✅ |
-| Workflow Studio (Live Agent Graph) | ✅ |
-| Knowledge Base (ChromaDB search + ingestion) | ✅ |
-| LangSmith Tracing | ✅ |
-| Agent Performance Metrics | ✅ |
-| Explain AI Decision | ✅ |
+| GO / GO_WITH_RISK / NO_GO Release Decision | ✅ |
+| CLI with Rich terminal output | ✅ |
+| CI/CD exit code integration | ✅ |
+| Streamlit visual dashboard | ✅ |
+| Python API | ✅ |
+| LangGraph stateful orchestration | ✅ |
 
-## Platform Pages
-
-| Page | Description |
-|---|---|
-| Home | System health, last release decision, agent activity feed |
-| AI Test Generator | User story → requirements → test cases → verification |
-| Selenium Generator | Script gen, HITL gate, self-healing panel |
-| API Tester | API test generation + live execution + Postman export |
-| Bug Analyzer | Log analysis, RAG-backed root cause, fix suggestions |
-| Reports | Engineer/Executive views, GO/NO GO decision, charts |
-| Workflow Studio | Live LangGraph graph, GlobalState inspector |
-| Knowledge Base | ChromaDB search, document ingestion |
-
-## Quick Start (Local)
-
-```bash
-git clone https://github.com/sagar-grv/ai-testpilot-x
-cd ai-testpilot-x
-
-python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-# macOS/Linux:
-source .venv/bin/activate
-
-pip install -r requirements.txt
-
-cp .env.example .env
-# Edit .env — add your GEMINI_API_KEY from https://aistudio.google.com/app/apikey
-
-streamlit run app.py
-```
-
-Open: **http://localhost:8501**
-
-## Environment Variables
-
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `GEMINI_API_KEY` | Yes | — | Google AI Studio API key (`AIzaSy...`) |
-| `EXECUTION_MODE` | No | MOCK | `LOCAL`, `MOCK`, or `GRID` |
-| `SELENIUM_GRID_URL` | Grid only | `http://localhost:4444/wd/hub` | Grid hub URL |
-| `LANGSMITH_API_KEY` | No | — | LangSmith tracing (optional) |
-
-## Selenium Grid (Real Browser Execution)
-
-```bash
-docker-compose up -d
-# Set EXECUTION_MODE=GRID in .env
-```
+---
 
 ## Tech Stack
 
 | Layer | Technologies |
 |---|---|
+| CLI | Typer + Rich |
 | AI Orchestration | LangGraph 0.3, LangChain 0.3 |
 | LLM | Google Gemini 2.5 Flash |
 | RAG | ChromaDB, sentence-transformers (all-MiniLM-L6-v2) |
@@ -123,19 +275,31 @@ docker-compose up -d
 | Validation | Pydantic v2 |
 | Observability | LangSmith, loguru |
 
-## Agents
+---
 
-| Agent | Role |
-|---|---|
-| RequirementAgent | Parses user story → modules, risk areas, priority |
-| TestCaseAgent | Generates structured test cases with RAG context |
-| VerificationAgent | Coverage check, duplicate detection, edge case gaps |
-| SeleniumAgent | Generates Python Selenium code per test case |
-| APIAgent | Generates HTTP test suites, supports live execution |
-| ExecutionAgent | HITL gate, trust domains, LOCAL/MOCK/GRID modes |
-| BugAgent | Root cause analysis, RAG correlation, clustering |
-| HealingAgent | Self-healing locators (ID→Name→data-*→CSS→XPath→AI) |
-| ReportAgent | GO / GO_WITH_RISK / NO_GO decision engine |
+## Quick Start (Local Development)
+
+```bash
+git clone https://github.com/sagar-grv/ai-testpilot-x
+cd ai-testpilot-x
+
+python -m venv .venv
+.venv\Scripts\activate   # Windows
+source .venv/bin/activate  # macOS/Linux
+
+pip install -r requirements.txt
+
+# Initialize config
+python -m cli.main init
+
+# Run pipeline
+python -m cli.main run --story "User can login and checkout"
+
+# Or launch the dashboard
+streamlit run app.py
+```
+
+---
 
 ## License
 

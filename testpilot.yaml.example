@@ -1,0 +1,29 @@
+# AI TestPilot X Configuration
+# Copy to testpilot.yaml and fill in your values.
+# Run: testpilot init  ← to generate this automatically
+
+# ── LLM Settings ──────────────────────────────────────────────────────────────
+# Get your key at https://aistudio.google.com/app/apikey
+gemini_api_key: ${GEMINI_API_KEY}
+
+# ── Test Execution ────────────────────────────────────────────────────────────
+# MOCK = simulated results (fast, no browser needed)
+# LOCAL = real Chrome on this machine (requires Chrome installed)
+# GRID  = Selenium Grid (docker-compose up -d first)
+execution_mode: MOCK
+
+# Target application URL
+target_url: https://your-app.com
+
+# ── Storage (created automatically) ──────────────────────────────────────────
+db_url: sqlite:///.testpilot/testpilot.db
+chroma_path: .testpilot/chroma_db
+
+# ── Output ────────────────────────────────────────────────────────────────────
+output_dir: .testpilot/reports
+log_level: WARNING
+
+# ── Optional ──────────────────────────────────────────────────────────────────
+# langsmith_api_key: ${LANGSMITH_API_KEY}
+# langsmith_tracing: false
+# max_agent_retries: 2

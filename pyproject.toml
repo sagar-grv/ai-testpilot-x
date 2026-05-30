@@ -1,0 +1,112 @@
+[build-system]
+requires = ["setuptools>=70", "setuptools-scm>=8"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "ai-testpilot-x"
+version = "1.0.0"
+description = "Autonomous AI-powered QA CLI — generate tests, run Selenium, analyze bugs, get GO/NO GO release decisions"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "sagar-grv", email = ""}]
+keywords = ["testing", "qa", "automation", "ai", "selenium", "llm", "langchain"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Testing",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.11"
+
+dependencies = [
+    # LLM + Orchestration
+    "google-generativeai>=0.8",
+    "langchain==0.3.*",
+    "langgraph==0.3.*",
+    "langchain-google-genai>=2.0",
+
+    # Embeddings + Vector DB
+    "sentence-transformers>=3.0",
+    "chromadb>=0.5",
+
+    # CLI
+    "typer>=0.12",
+    "rich>=13.7",
+    "pyyaml>=6.0",
+
+    # HTTP / API testing
+    "httpx>=0.27",
+
+    # Storage
+    "sqlalchemy>=2.0",
+    "alembic>=1.13",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "python-dotenv>=1.0",
+    "typing-extensions>=4.9",
+
+    # Observability
+    "langsmith>=0.1",
+    "loguru>=0.7",
+]
+
+[project.optional-dependencies]
+# Full Streamlit dashboard
+ui = [
+    "streamlit>=1.40",
+    "plotly>=5.0",
+    "streamlit-agraph>=0.0.45",
+    "streamlit-ace>=0.1.1",
+    "pandas>=2.0",
+    "pillow>=10.0",
+]
+# Selenium-based real browser execution
+selenium = [
+    "selenium>=4.0",
+    "webdriver-manager>=4.0",
+]
+# Playwright-based execution (future)
+playwright = [
+    "playwright>=1.40",
+]
+# Document ingestion into knowledge base
+docs = [
+    "pypdf>=4.0",
+    "python-docx>=1.0",
+]
+# Install everything
+all = [
+    "ai-testpilot-x[ui,selenium,playwright,docs]",
+]
+# Development extras
+dev = [
+    "pytest>=8.0",
+    "pytest-html>=4.0",
+    "black>=24.0",
+    "ruff>=0.4",
+    "pre-commit>=3.0",
+]
+
+[project.scripts]
+testpilot = "cli.main:app"
+
+[project.urls]
+Homepage = "https://ai-testpilot-x.streamlit.app/"
+Repository = "https://github.com/sagar-grv/ai-testpilot-x"
+"Bug Tracker" = "https://github.com/sagar-grv/ai-testpilot-x/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+    "agents*", "core*", "schemas*", "models*",
+    "storage*", "memory*", "monitoring*", "execution*",
+    "prompts*", "cli*",
+]
+
+[tool.setuptools.package-data]
+"prompts" = ["*.txt"]
+"*" = ["*.yaml", "*.toml"]

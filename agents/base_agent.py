@@ -5,15 +5,44 @@ import time
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
+from datetime import datetime, timezone
 from core.llm_client import LLMClient
 from core.event_bus import bus, EventType
 from monitoring.logger import get_logger
 from monitoring.metrics import timer
 from schemas.error_schema import ErrorSchema
-from datetime import datetime
 
 log = get_logger(__name__)
-PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
+
+
+def _find_prompts_dir() -> Path:
+    """Locate prompts/ directory — works both from source and installed package."""
+    # Try relative to this file (works when running from source)
+    candidates = [
+        Path(__file__).parent.parent / "prompts",   # source layout: agents/../prompts
+        Path(__file__).parent / "prompts",           # flat layout
+        Path.cwd() / "prompts",                      # cwd fallback
+    ]
+    for c in candidates:
+        if c.exists() and c.is_dir():
+            return c
+
+    # Try importlib.resources (installed package)
+    try:
+        import importlib.resources as pkg_resources
+        ref = pkg_resources.files("prompts")
+        # Convert to a real Path by traversing to a known file
+        p = Path(str(ref))
+        if p.exists():
+            return p
+    except Exception:
+        pass
+
+    # Return best guess even if it doesn't exist yet
+    return Path(__file__).parent.parent / "prompts"
+
+
+PROMPTS_DIR = _find_prompts_dir()
 
 
 class BaseAgent(ABC):
@@ -28,7 +57,10 @@ class BaseAgent(ABC):
     def _load_prompt(self, prompt_file: str) -> str:
         path = PROMPTS_DIR / prompt_file
         if not path.exists():
-            raise FileNotFoundError(f"Prompt file not found: {path}")
+            raise FileNotFoundError(
+                f"Prompt file not found: {path}\n"
+                f"PROMPTS_DIR resolved to: {PROMPTS_DIR}"
+            )
         return path.read_text(encoding="utf-8")
 
     def _call_llm(self, prompt: str) -> str:
@@ -52,7 +84,7 @@ class BaseAgent(ABC):
             agent_name=self.agent_name,
             error_type=type(error).__name__,
             message=str(error),
-            timestamp=datetime.utcnow().isoformat(),
+            timestamp=datetime.now(timezone.utc).isoformat(),
         )
         bus.emit(EventType.AGENT_FAILED, {"error": err.model_dump()})
         self.log.error(f"Agent failed: {error}")

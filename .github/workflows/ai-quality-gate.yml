@@ -1,0 +1,58 @@
+name: AI Quality Gate
+
+# Runs AI TestPilot X as a quality gate on every push and pull request.
+# Exit code 0 (GO) = CI passes.  1 (GO WITH RISK) or 2 (NO GO) = CI fails.
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  ai-quality-gate:
+    name: AI TestPilot X — Quality Gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install AI TestPilot X
+        run: pip install ai-testpilot-x
+
+      # ── Option A: Use testpilot.yaml in your repo (recommended) ──────────────
+      - name: Run AI quality gate
+        run: |
+          testpilot run \
+            --story "User should be able to login and checkout successfully" \
+            --mode MOCK
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        # Exit code 0 = GO (CI passes)
+        # Exit code 1 = GO WITH RISK (CI fails — consider --allow-risk to pass)
+        # Exit code 2 = NO GO (CI fails)
+
+      # ── Option B: Analyze bugs from your existing test output ────────────────
+      # Uncomment to analyze a stack trace from your own test runner:
+      #
+      # - name: Analyze test failures
+      #   if: failure()
+      #   run: testpilot bugs --log "${{ env.TEST_ERROR_LOG }}"
+      #   env:
+      #     GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+      # ── Upload report as artifact ─────────────────────────────────────────────
+      - name: Upload quality report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-testpilot-report
+          path: .testpilot/reports/
+          if-no-files-found: ignore
