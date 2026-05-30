@@ -1,6 +1,6 @@
 name: Publish to PyPI
 
-# Triggers on a version tag push: git tag v1.0.0 && git push --tags
+# Triggers on a version tag push: git tag v1.0.1 && git push --tags
 on:
   push:
     tags:
@@ -15,15 +15,18 @@ jobs:
     runs-on: ubuntu-latest
     environment: pypi-release
 
-    # Trusted Publishing (OIDC) — no stored PyPI token needed.
-    # One-time setup: go to pypi.org -> Your account -> Publishing ->
-    # Add a new pending publisher:
-    #   Owner:      sagar-grv
-    #   Repository: ai-testpilot-x
-    #   Workflow:   publish.yml
-    #   Environment: pypi-release
+    # Trusted Publishing (OIDC) - no stored PyPI token needed.
+    # One-time setup on PyPI:
+    #   pypi.org -> Account -> Publishing -> Add pending publisher
+    #     PyPI project name: ai-testpilot-x
+    #     Owner:             sagar-grv
+    #     Repository:        ai-testpilot-x
+    #     Workflow:          publish.yml
+    #     Environment:       pypi-release
+    # One-time setup on GitHub:
+    #   Settings -> Environments -> New environment -> name: pypi-release
     permissions:
-      id-token: write   # required for trusted publishing
+      id-token: write   # required for OIDC trusted publishing
       contents: read
 
     steps:
@@ -46,4 +49,4 @@ jobs:
 
       - name: Publish to PyPI (Trusted Publishing)
         uses: pypa/gh-action-pypi-publish@release/v1
-        # No username/password needed — uses OIDC trusted publishing
+        # No API token needed - uses GitHub OIDC to authenticate with PyPI
